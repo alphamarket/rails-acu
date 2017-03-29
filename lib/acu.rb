@@ -6,14 +6,11 @@ module Acu
     'engine',
     'config',
     'rules',
-  ].each do |file|
-    autoload file.humanize.to_sym, "acu/#{file}"
-  end
-
-  [
-    'errors',
     'monitor'
   ].each do |file|
-    require_relative "acu/#{file}"
+    Acu.autoload file.humanize.to_sym, "acu/#{file}"
   end
+
+  # reset the configs
+  Config.reset
 end

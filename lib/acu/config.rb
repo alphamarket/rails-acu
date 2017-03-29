@@ -8,12 +8,8 @@ module Acu
       protected :new
       attr_reader :configs
 
-      def initialize
-        reset
-      end
-
       def reset
-        @options = {
+        @configs = {
           defaults: {
             allow: false
           }
@@ -23,33 +19,13 @@ module Acu
       def audit_log log
       end
 
-      class_eval <<-METHODS, __FILE__, __LINE__ + 1
+      def get *args
+        @configs.dig *args
+      end
 
-        def #{key}_by_#{root} val
-          @configs[root][key] = val
-        end
-
-        def #{key}_by_#{root}?
-          @configs[root][key]
-        end
-
-        def #{key}_#{root} val
-          @configs[root][key] = val
-        end
-
-        def #{key}_#{root}?
-          @configs[root][key]
-        end
-
-        def #{key} val
-          @configs[key] = val
-        end
-
-        def #{key}?
-          @configs[key]
-        end
-
-      METHODS
+      def set val, *args
+        @configs = args.reverse.inject(val) { |k, v| {k => v} }
+      end
     end
   end
 end

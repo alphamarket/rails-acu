@@ -1,4 +1,4 @@
-module ACU
+module Acu
 
   class AccessDenied < StandardError
   end

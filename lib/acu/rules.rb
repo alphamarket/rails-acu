@@ -1,4 +1,5 @@
 require_relative 'helpers'
+require_relative 'errors'
 
 module Acu
   class Rules
@@ -21,6 +22,10 @@ module Acu
       def reset
         @rules = { }
         @entities = { }
+      end
+
+      def allow_by_default
+        Config.set true, :default, :allow?
       end
 
       # only: only the defined `controllers` in the `namespace`
@@ -83,11 +88,13 @@ module Acu
         build_rule({"#{symbol}": :deny})
       end
 
+      ################### end of ops ####################
+
       protected
 
       def build_rule rule
-        rules[@_params.clone] ||= {}
-        rules[@_params.clone] = rules[@_params.clone].merge(rule);
+        @rules[@_params.clone] ||= {}
+        @rules[@_params.clone] = rules[@_params.clone].merge(rule);
       end
 
       def build_rule_entry
