@@ -1,5 +1,11 @@
-require "acu/engine"
+require 'rails'
+require 'active_support'
 
 module Acu
-  # Your code goes here...
+  [
+    'engine',
+    'rules'
+  ].each do |file|
+    autoload file.humanize.to_sym, "acu/#{file}"
+  end
 end
