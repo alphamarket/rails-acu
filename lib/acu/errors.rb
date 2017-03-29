@@ -1,4 +1,4 @@
-module Acu
+module ACU
 
   class AccessDenied < StandardError
   end
@@ -12,10 +12,22 @@ module Acu
   class AmbiguousRule < StandardError
   end
 
-  class MissingUser < StandardError
+  class InvalidData < StandardError
   end
 
-  class MissingAction < StandardError
+  class MissingData < InvalidData
+  end
+
+  class MissingUser < InvalidData
+  end
+
+  class MissingAction < InvalidData
+  end
+
+  class MissingController < InvalidData
+  end
+
+  class MissingNamespace < InvalidData
   end
 
 end

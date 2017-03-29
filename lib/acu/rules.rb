@@ -66,7 +66,7 @@ module Acu
 
       def whois(symbol, args: nil, &block)
         @entities[symbol] = {
-          args: [args].flatten,
+          args: [args || []].flatten,
           callback: block
         }
       end
@@ -76,11 +76,11 @@ module Acu
       ###################################################
 
       def allow symbol
-        build_rule({symbol: :allow})
+        build_rule({"#{symbol}": :allow})
       end
 
       def deny symbol
-        build_rule({symbol: :deny})
+        build_rule({"#{symbol}": :deny})
       end
 
       protected
