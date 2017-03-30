@@ -1,6 +1,5 @@
-# This is an examble, modified it as well
+# This is an examble, modify it as well
 Acu::Rules.define do
-
   # anyone make a request could be count as everyone!
   whois :everyone { true }
 
