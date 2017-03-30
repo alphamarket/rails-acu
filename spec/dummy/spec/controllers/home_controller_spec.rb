@@ -447,7 +447,34 @@ RSpec.describe HomeController, type: :controller do
           expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="contact".*as `:everyone, :client`/
         end
       end
-
+    end
+  end
+  context "Acu::Helpers" do
+    it "acu_is?" do
+      Acu::Rules.define do
+        whois :everyone { true }
+        whois :client { false }
+      end
+      expect(acu_is? :everyone).to be true
+      expect(acu_is? :client).to be false
+    end
+    it "acu_do" do
+      Acu::Rules.define do
+        whois :everyone { true }
+        whois :client { false }
+      end
+      acu_as :everyone do
+        # a valid syntax
+        expect(false).not_to be true
+      end
+      acu_as :client do
+        # an invalid syntax, this should never run
+        expect(true).to be false
+      end
+      # the :everyone should get true
+      acu_as [:client, :everyone] do
+        expect(acu_is? :everyone).to be true
+      end
     end
   end
 end
