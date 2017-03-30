@@ -1,0 +1,30 @@
+language: ruby
+
+rvm:
+  - 2.4.0
+
+cache: bundler
+
+sudo: false
+
+env:
+  - RAILS_ENV=test
+
+matrix:
+  fast_finish: true
+
+before_install:
+  - gem update --system 2.6.11
+  - gem install bundler -v 1.14.6
+
+script:
+  - export RAILS_ENV=test
+  - bundle exec rake db:create
+  - bundle exec rake db:migrate
+  - bundle exec rake db:seed
+  - bundle exec rspec
+
+notifications:
+  email:
+    recipients:
+      - b.g.dariush@gmail.com
