@@ -20,6 +20,9 @@ module Acu
         rules = Rules.rules.select do |cond, _|
           flag = true;
 
+          # check if this is a global rule!
+          next true if cond.empty?
+
           {namespace: nil, controller: :namespace, action: :controller}.each do |current, parent|
             if eval("_info.#{current}")
               t = false
@@ -53,7 +56,7 @@ module Acu
             # fetch the related args to the entity from the `kwargs`
             kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
             # if fetched args and pre-defined arg didn't match?
-            raise Acu::MissingData.new("at least one of arguments for `whois :#{entity}` in `#{_info.to_s}` is not provided!") if kwargs.length != e[:args].length
+            raise Acu::Errors::MissingData.new("at least one of arguments for `whois :#{entity}` in `#{_info.to_s}` is not provided!") if kwargs.length != e[:args].length
             # check it the current request can relay to the entity?
             # send varibles in order the have defined
             if e[:callback].call(*e[:args].map { |i| kwargs[i] })
@@ -90,11 +93,11 @@ module Acu
 
       def access_denied _info, entity, by_default: false
         log_audit ("[x] access DENIED to `#{_info.to_s}` as `:#{entity}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
-        raise AccessDenied.new("you don't have the enough access for process this request!")
+        raise Errors::AccessDenied.new("you don't have the enough access for process this request!")
       end
 
       def process request
-        raise InvalidData.new("the request object needs to provided!") if not(request and request[:parameters])
+        raise Errors::InvalidData.new("the request object needs to provided!") if not(request and request[:parameters])
         p = request[:parameters]
         nc = p["controller"].split('/');
         n = nc.length > 1 ? nc.first : nil

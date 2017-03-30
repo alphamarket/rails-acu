@@ -9,7 +9,7 @@ module Acu
     files.each { |f| eval "#{command} :#{f.humanize.to_sym}, '#{under}#{f}'" }
   end
 
-  register 'engine', 'rules', 'monitor', 'listeners', 'injectors', 'configs'
+  register 'engine', 'rules', 'monitor', 'listeners', 'injectors', 'configs', 'errors'
 
   # Default way to set up Acu. Run rails generate devise_install to create
   # a fresh initializer with all configuration values.
@@ -17,6 +17,8 @@ module Acu
     yield Acu::Configs
   end
 
+  # include the error utilities
+  include Errors
   # include listeners
   include Listeners
   # include Injector operations

@@ -1,5 +1,4 @@
 require_relative 'utilities'
-require_relative 'errors'
 
 module Acu
   class Rules
@@ -33,7 +32,7 @@ module Acu
       def namespace name, except: nil, only: nil
         only = nil if only and not (only.kind_of?(Array) or only.length == 0)
         except = nil if except and not (except.kind_of?(Array) or except.length == 0)
-        raise AmbiguousRule.new('cannot have both `only` and `except` options at the same time for namespace `%s`' %name) if only and except
+        raise Errors::AmbiguousRule.new('cannot have both `only` and `except` options at the same time for namespace `%s`' %name) if only and except
         pass namespace: { name: name.downcase, except: except, only: only } do
           yield
         end
@@ -44,16 +43,16 @@ module Acu
       def controller name, except: nil, only: nil
         only = nil if only and not (only.kind_of?(Array) or only.length == 0)
         except = nil if except and not (except.kind_of?(Array) or except.length == 0)
-        raise AmbiguousRule.new("there is already an `except` or `only` constraints defined in container namespace `#{@_params[:namespace][:name]}`") if @_params[:namespace] and (@_params[:namespace][:except] || @_params[:namespace][:only])
-        raise AmbiguousRule.new('cannot have both `only` and `except` options at the same time for controller `%s`' %name) if only and except
+        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container namespace `#{@_params[:namespace][:name]}`") if @_params[:namespace] and (@_params[:namespace][:except] || @_params[:namespace][:only])
+        raise Errors::AmbiguousRule.new('cannot have both `only` and `except` options at the same time for controller `%s`' %name) if only and except
         pass controller: { name: name.downcase, except: except, only: only } do
           yield
         end
       end
 
       def action name
-        raise AmbiguousRule.new("at least one of the parent `controller` or `namespace` needs to be defined for the this action") if not (@_params[:namespace] || @_params[:controller])
-        raise AmbiguousRule.new("there is already an `except` or `only` constraints defined in container controller `#{@_params[:controller][:name]}`") if @_params[:controller] and (@_params[:controller][:except] || @_params[:controller][:only])
+        raise Errors::AmbiguousRule.new("at least one of the parent `controller` or `namespace` needs to be defined for the this action") if not (@_params[:namespace] || @_params[:controller])
+        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container controller `#{@_params[:controller][:name]}`") if @_params[:controller] and (@_params[:controller][:except] || @_params[:controller][:only])
         pass action: { name: name.downcase } do
           yield
         end
@@ -101,11 +100,11 @@ module Acu
         n = @_params[:namespace]
         c = @_params[:controller]
         a = @_params[:action]
-        raise AmbiguousRule.new('invalid input') if not ( n or c or a )
-        raise AmbiguousRule.new('cannot have rule for controller `%s` inside the namespace `%s` that `except`ed it!' %[c[:name], n[:name]]) if n and n[:except] and c and n[:except].include? c[:name]
-        raise AmbiguousRule.new('cannot have rule for action `%s` inside the controler `%s` that `except`ed it!' %[a[:name], c[:name]]) if c and c[:except] and a and c[:except].include? a[:name]
-        raise AmbiguousRule.new('cannot have rule for controller `%s` inside the namespace `%s` that has bounded to `only` some other controllers!' %[c[:name], n[:name]]) if n and n[:only] and c and not(n[:only].include? c[:name])
-        raise AmbiguousRule.new('cannot have rule for action `%s` inside the controller `%s` that has bounded to `only` some other actions!' %[a[:name], c[:name]]) if c and c[:only] and a and not(c[:only].include? a[:name])
+        raise Errors::AmbiguousRule.new('invalid input') if not ( n or c or a )
+        raise Errors::AmbiguousRule.new('cannot have rule for controller `%s` inside the namespace `%s` that `except`ed it!' %[c[:name], n[:name]]) if n and n[:except] and c and n[:except].include? c[:name]
+        raise Errors::AmbiguousRule.new('cannot have rule for action `%s` inside the controler `%s` that `except`ed it!' %[a[:name], c[:name]]) if c and c[:except] and a and c[:except].include? a[:name]
+        raise Errors::AmbiguousRule.new('cannot have rule for controller `%s` inside the namespace `%s` that has bounded to `only` some other controllers!' %[c[:name], n[:name]]) if n and n[:only] and c and not(n[:only].include? c[:name])
+        raise Errors::AmbiguousRule.new('cannot have rule for action `%s` inside the controller `%s` that has bounded to `only` some other actions!' %[a[:name], c[:name]]) if c and c[:only] and a and not(c[:only].include? a[:name])
 
         entries = [];
 
