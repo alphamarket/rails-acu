@@ -29,11 +29,11 @@ module Acu
 
       # only: only the defined `controllers` in the `namespace`
       # except: except the defined `controllers` in the `namespace`
-      def namespace name, except: nil, only: nil
+      def namespace name = nil, except: nil, only: nil
         only = nil if only and not (only.kind_of?(Array) or only.length == 0)
         except = nil if except and not (except.kind_of?(Array) or except.length == 0)
         raise Errors::AmbiguousRule.new('cannot have both `only` and `except` options at the same time for namespace `%s`' %name) if only and except
-        pass namespace: { name: name.downcase, except: except, only: only } do
+        pass namespace: { name: name ? name.downcase : name, except: except, only: only } do
           yield
         end
       end
