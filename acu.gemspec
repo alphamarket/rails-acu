@@ -5,7 +5,7 @@ require "acu/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "acu"
+  s.name        = "rails-acu"
   s.version     = Acu::VERSION
   s.authors     = ["Dariush Hasanpour"]
   s.email       = ["b.g.dariush@gmail.com"]
