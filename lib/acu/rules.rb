@@ -79,17 +79,29 @@ module Acu
       # at this point we assign the class varible rules #
       ###################################################
 
-      def allow symbol
-        build_rule({"#{symbol}": :allow})
+      def allow symbol, on: []
+        op symbol, :allow, on
       end
 
-      def deny symbol
-        build_rule({"#{symbol}": :deny})
+      def deny symbol, on: []
+        op symbol, :deny, on
       end
 
       ################### end of ops ####################
 
       protected
+
+      def op symbol, opr, on
+        raise Errors::InvalidData.new("invalid argument") if symbol.to_s.blank? or opr.to_s.blank?
+        raise Errors::AmbiguousRule.new("cannot have `on` argument inside the action `#{@_params[:action][:name]}`") if not on.empty? and @_params[:action]
+        return if on.empty? and build_rule({"#{symbol}": opr})
+        # for each action in the `on` create a new rule
+        on.each do |a|
+          action a do
+            build_rule({"#{symbol}": opr})
+          end
+        end
+      end
 
       def build_rule rule
         @rules[@_params.clone] ||= {}
