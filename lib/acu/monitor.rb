@@ -11,7 +11,7 @@ module Acu
       protected :new
       attr_reader :kwargs
 
-      def on kwargs
+      def by kwargs
         @kwargs = kwargs
       end
 
@@ -58,15 +58,8 @@ module Acu
         rules.each do |_, rule|
           # for each entity and it's actions in the rule
           rule.each do |entity, action|
-            # fetch the entity's identity
-            e = Rules.entities[entity]
-            # fetch the related args to the entity from the `kwargs`
-            kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
-            # if fetched args and pre-defined arg didn't match?
-            raise Acu::Errors::MissingData.new("at least one of arguments for `whois :#{entity}` in `#{_info.to_s}` is not provided!") if kwargs.length != e[:args].length
             # check it the current request can relay to the entity?
-            # send varibles in order the have defined
-            if e[:callback].call(*e[:args].map { |i| kwargs[i] })
+            if valide_for? entity
               case action
               when :allow
                 _granted_entities << entity.to_s
@@ -85,6 +78,19 @@ module Acu
         # if we reached here it measn that have found no rule to deny/allow the request and we have to fallback to the defaults
         access_denied  _info, :__ACU_BY_DEFAULT__, by_default: true if not Configs.get :allow_by_default
         access_granted _info, :__ACU_BY_DEFAULT__, by_default: true
+      end
+
+      def valide_for? entity
+        # check for existance
+        raise Errors::MissingEntity.new("whois :#{entity}?") if not Rules.entities[entity]
+        # fetch the entity's identity
+        e = Rules.entities[entity]
+        # fetch the related args to the entity from the `kwargs`
+        kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
+        # if fetched args and pre-defined arg didn't match?
+        raise Errors::MissingData.new("at least one of arguments for `whois :#{entity}` in `#{_info.to_s}` is not provided!") if kwargs.length != e[:args].length
+        # send varibles in order the have defined
+        e[:callback].call(*e[:args].map { |i| kwargs[i] })
       end
 
       protected

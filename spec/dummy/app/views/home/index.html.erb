@@ -1,2 +1,21 @@
 <h1>Home#index</h1>
 <p>Find me in app/views/home/index.html.erb</p>
+
+<%= link_to 'signout', destroy_user_session_path,  method: :delete %><br />
+<%= link_to 'signin', new_user_session_path %><br />
+
+<% acu_as [:admin, :client, :pr] do %>
+  YOU ARE SOMEBODY
+<% end %><br />
+<% acu_as [:client] do %>
+  YOU ARE CLIENT
+<% end %><br />
+<% acu_as [:admin] do %>
+  YOU ARE ADMIN
+<% end %><br />
+<% acu_as [:pr] do %>
+  YOU ARE PR
+<% end %><br />
+
+<%= raw acu_is? :admin %>
+<%= raw acu_is? :client %>

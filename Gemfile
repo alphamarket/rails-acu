@@ -25,5 +25,6 @@ group :development, :test do
   gem 'sqlite3'
   gem 'awesome_print', github: 'awesome-print/awesome_print'
   gem 'devise'
+  gem 'jquery-rails'
   gem 'rails-controller-testing'
 end

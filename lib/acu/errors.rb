@@ -19,16 +19,19 @@ module Acu
     class MissingData < InvalidData
     end
 
-    class MissingUser < InvalidData
+    class MissingEntity < MissingData
     end
 
-    class MissingAction < InvalidData
+    class MissingUser < MissingData
     end
 
-    class MissingController < InvalidData
+    class MissingAction < MissingData
     end
 
-    class MissingNamespace < InvalidData
+    class MissingController < MissingData
+    end
+
+    class MissingNamespace < MissingData
     end
   end
 end

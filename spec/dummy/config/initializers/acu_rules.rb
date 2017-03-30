@@ -3,6 +3,12 @@ Acu::Rules.define do
   # anyone make a request could be count as everyone!
   whois :everyone { true }
 
+  whois :admin, args: [:user] { |c| c and c.user_type.symbol == :ADMIN.to_s }
+
+  whois :client, args: [:user] { |c| c and c.user_type.symbol == :PUBLIC.to_s }
+
+  whois :pr, args: [:user] { |c| c and c.user_type.symbol == :PR.to_s }
+
   allow :everyone
 
   # define how is admin?
