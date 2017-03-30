@@ -2,46 +2,48 @@ require 'rails_helper'
 
 RSpec.describe Admin::ManageController, type: :controller do
 
-  describe "GET #index" do
-    it "returns http success" do
-      get :index
-      expect(response).to have_http_status(:success)
+  before(:each) {
+    # reset rules
+    Acu::Rules.reset
+    # reset configs
+    Acu.setup do |config|
+      config.base_controller  = :ApplicationController
+      config.allow_by_default = false
+      config.audit_log_file   = '/tmp/acu-rspec.log'
     end
-  end
+  }
 
-  describe "GET #show" do
-    it "returns http success" do
-      get :show
-      expect(response).to have_http_status(:success)
+  it "should work with namespaces" do
+    Acu::Rules.define do
+      whois :everyone { true }
+      allow :everyone
     end
-  end
+    get :index
 
-  describe "GET #list" do
-    it "returns http success" do
-      get :list
-      expect(response).to have_http_status(:success)
+    Acu::Rules.define do
+      namespace do
+        controller :home do
+          deny :everyone, on: [:index, :contact]
+        end
+      end
     end
-  end
+    # we filtered the default namespace not this
+    get :index
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="index".*as `:everyone`/
 
-  describe "GET #delete" do
-    it "returns http success" do
-      get :delete
-      expect(response).to have_http_status(:success)
+    Acu::Rules.define do
+      namespace :admin, except: [:posts] do
+        deny :everyone, on: [:show, :list]
+      end
+      namespace :admin, only: [:manage] do
+        deny :everyone, on: [:index]
+      end
     end
+    expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="index".*as `:everyone`/
+    expect {get :show}.to raise_error(Acu::Errors::AccessDenied)
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="show".*as `:everyone`/
+    expect {get :list}.to raise_error(Acu::Errors::AccessDenied)
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="list".*as `:everyone`/
   end
-
-  describe "GET #add" do
-    it "returns http success" do
-      get :add
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET #prove" do
-    it "returns http success" do
-      get :prove
-      expect(response).to have_http_status(:success)
-    end
-  end
-
 end

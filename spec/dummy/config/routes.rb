@@ -15,8 +15,5 @@ Rails.application.routes.draw do
 
   get 'home/contact'
 
-  resources :comments
-  resources :books
-
-  mount Acu::Engine => "/acu", :as => "acu"
+  mount Acu::Engine => "/acu"
 end
