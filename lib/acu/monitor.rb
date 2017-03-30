@@ -64,7 +64,7 @@ module Acu
               when :deny
                 access_denied  _info, entity
               else
-                Config.audit_log "> access DENIED to undefined entity as `:#{entity}` to `#{_info.to_s}`"
+                log_audit "> access DENIED to undefined entity as `:#{entity}` to `#{_info.to_s}`"
                 raise Exception.new("action `#{action}` for access `#{_info.to_s}` undefined!")
               end
             end
@@ -73,18 +73,23 @@ module Acu
         # if the access is granted? i.e if all the rules are satisfied with the request
         return if _granted
         # if we reached here it measn that have found no rule to deny/allow the request and we have to fallback to the defaults
-        access_granted _info, :__ACU_BY_DEFAULT__ and return if Config.get :default, :allow?
-        access_denied  _info, :__ACU_BY_DEFAULT__
+        access_granted _info, :__ACU_BY_DEFAULT__, by_default: true and return if Configs.get :allow_by_default
+        access_denied  _info, :__ACU_BY_DEFAULT__, by_default: true
       end
 
       protected
 
-      def access_granted _info, entity
-        Config.audit_log "[-] access GRANTED to `#{_info.to_s}` as `:#{entity}`"
+      def log_audit log
+        file = Configs.get :audit_log_file
+        Logger.new(Configs.get :audit_log_file).info(log) if file and not file.blank?
       end
 
-      def access_denied _info, entity
-        Config.audit_log "[x] access DENIED to `#{_info.to_s}` as `:#{entity}`"
+      def access_granted _info, entity, by_default: false
+        log_audit ("[-] access GRANTED to `#{_info.to_s}` as `:#{entity}`" + (by_default ? " [autherized by :allow_by_default?]" : ""))
+      end
+
+      def access_denied _info, entity, by_default: false
+        log_audit ("[x] access DENIED to `#{_info.to_s}` as `:#{entity}`" + (by_default ? " [autherized by :allow_by_default?]" : ""))
         raise AccessDenied.new("you don't have the enough access for process this request!")
       end
 

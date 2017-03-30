@@ -1,3 +1,4 @@
+
 Acu::Rules.define do
   whois :everyone { true }
   whois :admin, args: [:user] { |c| c and c.user_type.symbol == :ADMIN.to_s }
