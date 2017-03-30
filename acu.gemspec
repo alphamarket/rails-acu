@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.email       = ["b.g.dariush@gmail.com"]
   s.homepage    = "https://github.com/noise2/rails-acu"
   s.summary     = "Access Control Unit"
-  s.description = "Access Control Unit"
+  s.description = "Access control unit for controller-action sets"
   s.license     = "MIT"
 
   s.files         = `git ls-files`.split("\n")
@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
 
   s.require_paths = ["lib"]
 
-  s.add_dependency "rails", "~> 5.0.2"
+  s.add_dependency "rails", "~> 5.0.0", '>= 5.0.0'
 end
