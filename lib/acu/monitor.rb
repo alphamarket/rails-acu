@@ -96,6 +96,7 @@ module Acu
 
       def access_granted _info, entity, by_default: false
         log_audit ("[-] access GRANTED to `#{_info.to_s}` as `:#{entity}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
+        true
       end
 
       def access_denied _info, entity, by_default: false
