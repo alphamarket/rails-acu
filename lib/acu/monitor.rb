@@ -4,11 +4,18 @@ module Acu
 
   class Monitor
 
+    @kwargs = { }
+
     class << self
 
       protected :new
+      attr_reader :kwargs
 
       def on kwargs
+        @kwargs = kwargs
+      end
+
+      def gaurd
         _info = process Acu::Listeners.data[:request]
         rules = Rules.rules.select do |cond, _|
           flag = true;
@@ -44,7 +51,7 @@ module Acu
             # fetch the entity's identity
             e = Rules.entities[entity]
             # fetch the related args to the entity from the `kwargs`
-            kwargs = kwargs.reject { |x| !e[:args].include?(x) }
+            kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
             # if fetched args and pre-defined arg didn't match?
             raise Acu::MissingData.new("at least one of arguments for `whois :#{entity}` in `#{_info.to_s}` is not provided!") if kwargs.length != e[:args].length
             # check it the current request can relay to the entity?

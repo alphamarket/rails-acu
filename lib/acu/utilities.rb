@@ -1,5 +1,5 @@
 module Acu
-  module Helpers
+  module Utilities
     protected
     def helper_initialize
       instance_variable_set("@_params", {}) if not instance_variable_defined?("@_params")

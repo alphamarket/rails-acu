@@ -1,4 +1,4 @@
-require_relative 'helpers'
+require_relative 'utilities'
 require_relative 'errors'
 
 module Acu
@@ -13,7 +13,7 @@ module Acu
       attr_reader :rules
       attr_reader :entities
 
-      include Helpers
+      include Utilities
 
       def initialize
         reset
