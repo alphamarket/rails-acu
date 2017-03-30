@@ -24,29 +24,36 @@ module Acu
           next true if cond.empty?
 
           {namespace: nil, controller: :namespace, action: :controller}.each do |current, parent|
-            if eval("_info.#{current}")
-              t = false
-              # either mentioned explicitly
-              if cond[current]
-                t |= cond[current][:name] == eval("_info.#{current}").to_sym
-              # or in `only|except` tags
-              elsif parent
-                # if nothing mentioned in parent, assume for all
-                t |= not(cond[parent][:only] and cond[parent][:except])
-                # flag true if it checked in namespace's only tag
-                t |= (cond[parent][:only] and cond[parent][:only].include? eval("_info.#{current}").to_sym)
-                # flag false if it checked in namespace's except tag
-                t &= not(cond[parent][:expect] and cond[parent][:except].include? eval("_info.#{current}").to_sym)
+            t = -1
+            # either mentioned explicitly
+            if cond[current]
+              t = (cond[current][:name].to_s == eval("_info.#{current}").to_s) ? 1 : 0
+            # or in `only|except` tags
+            elsif parent and cond[parent]
+              # if nothing mentioned in parent, assume for all
+              t = 1 if not(cond[parent][:only] or cond[parent][:except])
+              # flag true if it checked in namespace's only tag
+              {only: {on_true: 1, on_false: 0} , except: {on_true: 0, on_false: 1}}.each do |tag, val|
+                if cond[parent][tag]
+                  case cond[parent][tag].include? eval("_info.#{current}").to_sym
+                  when true
+                    t = val[:on_true]
+                    break
+                  when false
+                    t = val[:on_false]
+                  end
+                end
               end
-              flag &= t;
             end
+            flag &= (t == 1) if t.between? 0, 1;
+            break if not flag
           end
-
           flag
         end
         # flag so we can process all the related rule and it all passed this should be false
         # if any failed, and exception will be raised
         _granted = false
+        _granted_entities = [];
         # for each mached rule
         rules.each do |_, rule|
           # for each entity and it's actions in the rule
@@ -62,8 +69,8 @@ module Acu
             if e[:callback].call(*e[:args].map { |i| kwargs[i] })
               case action
               when :allow
-                access_granted _info, entity
-                _granted = true;
+                _granted_entities << entity.to_s
+                _granted = true
               when :deny
                 access_denied  _info, entity
               else
@@ -74,7 +81,7 @@ module Acu
           end
         end
         # if the access is granted? i.e if all the rules are satisfied with the request
-        return if _granted
+        return if _granted and access_granted _info, _granted_entities.join(", :")
         # if we reached here it measn that have found no rule to deny/allow the request and we have to fallback to the defaults
         access_denied  _info, :__ACU_BY_DEFAULT__, by_default: true if not Configs.get :allow_by_default
         access_granted _info, :__ACU_BY_DEFAULT__, by_default: true
