@@ -3,10 +3,13 @@ require_relative 'errors'
 module Acu
 
   class Monitor
+
     class << self
 
-      def gaurd request, **kwargs
-        _info = process request
+      protected :new
+
+      def on kwargs
+        _info = process Acu::Listeners.data[:request]
         rules = Rules.rules.select do |cond, _|
           flag = true;
 
@@ -79,12 +82,12 @@ module Acu
       end
 
       def process request
-        raise InvalidData.new("the request object needs to provided!") if not request and request.parameters
-        p = request.parameters
-        nc = p[:controller].split('/');
+        raise InvalidData.new("the request object needs to provided!") if not(request and request[:parameters])
+        p = request[:parameters]
+        nc = p["controller"].split('/');
         n = nc.length > 1 ? nc.first : nil
         c = nc.length > 1 ? nc.second : nc.first
-        a = p[:action]
+        a = p["action"]
         Struct.new(:namespace, :controller, :action).new(n, c, a)
       end
 
