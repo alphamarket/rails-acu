@@ -414,6 +414,38 @@ RSpec.describe HomeController, type: :controller do
           expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
           expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="contact".*as `:everyone`/
         end
+        it "[bulk settings]" do
+          Acu::Rules.define do
+            whois :everyone { true }
+            whois :client { false }
+            namespace do
+              controller :home do
+                allow [:everyone, :client], on: [:index, :contact]
+              end
+            end
+          end
+          get :index
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="index".*as `:everyone`/
+          get :contact
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="contact".*as `:everyone`/
+          Acu::Rules.define { whois :client { true } }
+          get :index
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="index".*as `:everyone, :client`/
+          get :contact
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="contact".*as `:everyone, :client`/
+          Acu::Rules.define do
+            namespace do
+              controller :home do
+                action :index { deny [:everyone, :client] }
+              end
+            end
+          end
+          expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
+          # the first rule that failed is going to mention
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="index".*as `:everyone`/
+          get :contact
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="contact".*as `:everyone, :client`/
+        end
       end
 
     end

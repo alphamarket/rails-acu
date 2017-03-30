@@ -92,14 +92,15 @@ module Acu
       protected
 
       def op symbol, opr, on
-        raise Errors::InvalidData.new("invalid argument") if symbol.to_s.blank? or opr.to_s.blank?
+        symbol = [symbol].flatten if symbol
+        raise Errors::InvalidData.new("invalid argument") if not symbol or symbol.to_s.blank? or opr.to_s.blank?
         raise Errors::AmbiguousRule.new("cannot have `on` argument inside the action `#{@_params[:action][:name]}`") if not on.empty? and @_params[:action]
-        raise Errors::InvalidData.new("the symbol `#{symbol}` is not defined by `whois`") if not @entities.include? symbol
-        return if on.empty? and build_rule({"#{symbol}": opr})
+        raise Errors::InvalidData.new("the symbol `#{symbol}` is not defined by `whois`") if not symbol.all? { |s| @entities.include? s }
+        return if on.empty? and symbol.each { |s| build_rule({"#{s}": opr}) }
         # for each action in the `on` create a new rule
         on.each do |a|
           action a do
-            build_rule({"#{symbol}": opr})
+            symbol.each { |s| build_rule({"#{s}": opr}) }
           end
         end
       end
