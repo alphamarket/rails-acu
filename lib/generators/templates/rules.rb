@@ -3,35 +3,32 @@ Acu::Rules.define do
   # anyone make a request could be count as everyone!
   whois :everyone { true }
 
+  # whois :admin, args: [:user] { |c| c and c.user_type.symbol == :ADMIN.to_s }
+  # whois :client, args: [:user] { |c| c and c.user_type.symbol == :PUBLIC.to_s }
+
   # assume anyone can access
   # this has security leak of overrideing the `allow_by_default` config
   # allow :everyone
 
-  # define who is admin?
-  # whois :admin, args: [:user] { |c| c and c.user_type  == :ADMIN.to_s }
-
-  # define who is client?
-  # whois :client, args: [:user] { |c| c and c.user_type == :CLIENT.to_s }
-
-  # default namespace, it is good practice for being clear
+  # the default namespace
   # namespace do
-  #   controller :home, except: [:some_secret_action] do
-  #     allow :everyone
+  #   controller :home do
+  #     allow [:admin, :client], on: [:some_secret_action]
   #   end
   # end
 
-  # controller :contact, only: [:send_message] do
-  #   action :send do
-  #     allow :everyone
-  #   end
-  #   action :view { allow [:admin, :client] }
-  #   allow [:admin], on: [:approval]
-  # end
-
+  # the admin namespace
   # namespace :admin do
-  #   controller :post do
-  #     allow :admin
-  #     allow :client, on: [:show, :comment]
+  #   allow :admin
+
+  #   controller :contact, only: [:send_message] do
+  #     allow :everyone
+  #   end
+
+  #   controller :contact do
+  #     action :support {
+  #       allow :client
+  #     }
   #   end
   # end
 end

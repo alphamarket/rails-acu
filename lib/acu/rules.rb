@@ -28,10 +28,6 @@ module Acu
         @entities = { }
       end
 
-      def allow_by_default
-        Config.set true, :default, :allow?
-      end
-
       # only: only the defined `controllers` in the `namespace`
       # except: except the defined `controllers` in the `namespace`
       def namespace name = nil, except: nil, only: nil

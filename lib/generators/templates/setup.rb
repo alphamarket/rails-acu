@@ -5,7 +5,7 @@ Acu.setup do |config|
 
   # to tighten the security this is enabled by default
   # i.e if it checked to be true, then if a request didn't match to any of rules, it will get passed through
-  # otherwise the requests which don't fit into any of rules, we be denied by default
+  # otherwise the requests which don't fit into any of rules, the request is denied by default
   config.allow_by_default = false
 
   # the audit log file, to log how the requests handles, good for production
@@ -13,7 +13,7 @@ Acu.setup do |config|
   config.audit_log_file   = ""
 
   # cache the rules to make rule matching much faster
-  # it's not recommanded to use it in developement/test evn.
+  # it's not recommended to use it in developement/test evn.
   config.use_cache = false
 
   # the caching namespace
