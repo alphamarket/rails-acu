@@ -46,4 +46,27 @@ RSpec.describe Admin::ManageController, type: :controller do
     expect {get :list}.to raise_error(Acu::Errors::AccessDenied)
     expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="list".*as `:everyone`/
   end
+  it '[local-global & args]' do
+    Acu::Rules.define do
+      whois :admin, args: [:c] { |c| c == :admin }
+      whois :client, args: [:c] { |c| c == :client }
+      namespace :admin do
+        allow :admin
+        controller :manage, only: [:show] do
+          allow :client
+        end
+      end
+    end
+    Acu::Monitor.by c: :admin
+    get :index
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="index".*as `:admin`/
+    Acu::Monitor.by c: :client
+    expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="index".*\[autherized by :allow_by_default\]/
+
+    [:client, :admin].each do |cc|
+      Acu::Monitor.by c: cc
+      get :show
+    end
+  end
 end
