@@ -93,7 +93,7 @@ Occasionally there is some situation that you need to pass the some argument in 
 ```ruby
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
-  
+
   before_action { Acu::Monitor.by user: some_way_to_fetch_it }
 end
 ```
@@ -162,7 +162,7 @@ Here are the details of the configurations:
 | base_controller | `:ApplicationController` | In order that ACU gem to work it will attach some utilities to the base controller of all controllers, so if your base controller's name is something else change it. |
 | allow_by_default | `false` | Set it `true` if you want to grant access to requests that doesn't fit to any rules you have defined (**Warning:** please be advised, setting it `true` may cause a security hole in your website if you don't cover the rules perfectly!). |
 | audit_log_file |  | The audit log file, useful for rules debugging! |
-| use_cache | `false` | ACU can utilize the `Rails.cache` to make the rules matching much faster by caching them, but if caching is enabled and you change the please make user you have cleared the ACU caches by `Acu::Monitor.clear_cache`. | 
+| use_cache | `false` | ACU can utilize the `Rails.cache` to make the rules matching much faster by caching them, but if caching is enabled and you change the please make user you have cleared the ACU caches by `Acu::Monitor.clear_cache`. |
 | cache_* | 'acu' or `nil` | See rails [caching options](http://guides.rubyonrails.org/caching_with_rails.html#activesupport-cache-store) for details. |
 
 ### API
@@ -171,7 +171,7 @@ Here are the list of APIs that didn't mentioned above:
 | API | Arguments | Alias | Description |
 | ----- | :-------: | :------: | ---- |
 | `Acu::Configs.get` | `name` | N/A | Get the value of the `name`ed config |
-| `Acu::Monitor.by` | `kwargs` | N/A | Set the arguments demaned by blocks in `whois` | 
+| `Acu::Monitor.by` | `kwargs` | N/A | Set the arguments demaned by blocks in `whois` |
 | `Acu::Monitor.clear_cache` | None | N/A | Clears the ACU's rule matching cache |
 | `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.by` |
 | `Acu::Monitor.valid_for?` | `entity` | `acu_is?` | Check if the current request is come from the entity or not |
@@ -182,7 +182,7 @@ Here are the list of APIs that didn't mentioned above:
 
 
 ### Exceptions
-Here are the list of exceptions defined in ACU gem
+Here are the list of exceptions defined in ACU gem:
 
 ```ruby
 class Acu::Errors::AccessDenied < StandardError
