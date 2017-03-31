@@ -10,6 +10,10 @@ RSpec.describe HomeController, type: :controller do
       config.base_controller  = :ApplicationController
       config.allow_by_default = false
       config.audit_log_file   = '/tmp/acu-rspec.log'
+      config.use_cache = false
+      config.cache_namespace = 'acu'
+      config.cache_expires_in = nil
+      config.cache_race_condition_ttl = nil
     end
   }
 
@@ -474,6 +478,67 @@ RSpec.describe HomeController, type: :controller do
       # the :everyone should get true
       acu_as [:client, :everyone] do
         expect(acu_is? :everyone).to be true
+      end
+    end
+  end
+  context 'caching' do
+    it '[Rails.cache]' do
+      # make we didn't used the caching until now!
+      expect(Acu::Configs.get :use_cache).to be false
+      Rails.cache.delete :FooBar
+      expect(Rails.cache.exist? :FooBar).to be false
+      Rails.cache.write :FooBar, __FILE__
+      expect(Rails.cache.exist? :FooBar).to be true
+    end
+    it '[caches?]' do
+      Acu::Rules.define do
+        whois :everyone { true }
+        namespace do
+          controller :home do
+            action :index { allow :everyone }
+            action :contact { deny :everyone }
+          end
+        end
+      end
+      # it shouldn't use cache because we haven't told it yet
+      5.times do
+        get :index
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\] access GRANTED to.*action="index".*as `:everyone`/
+        expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\] access DENIED to.*action="contact".*as `:everyone`/
+      end
+
+      setup use_cache: true
+      Acu::Monitor.clear_cache
+
+      # make intial accesses, and cache
+      get :index
+      expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+
+      # both request should be ruled by cache now!
+      5.times do
+        get :index
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*action="index".*as `:everyone`/
+        expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*action="contact".*as `:everyone`/
+      end
+    end
+    it '[maintains cache]' do
+      setup use_cache: true
+      Acu::Rules.define do
+        whois :everyone { true }
+        namespace do
+          controller :home do
+            action :index { allow :everyone }
+            action :contact { deny :everyone }
+          end
+        end
+      end
+      5.times do
+        get :index
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*action="index".*as `:everyone`/
+        expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*action="contact".*as `:everyone`/
       end
     end
   end

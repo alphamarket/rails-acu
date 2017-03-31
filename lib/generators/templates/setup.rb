@@ -12,7 +12,19 @@ Acu.setup do |config|
   # leave it black for nil to disable the logging
   config.audit_log_file   = ""
 
-  # cache the rules to make your site faster
+  # cache the rules to make rule matching much faster
   # it's not recommanded to use it in developement/test evn.
   config.use_cache = false
+
+  # the caching namespace
+  config.cache_namespace = 'acu'
+
+  # define the expiration of cached entries
+  config.cache_expires_in = nil
+
+  # the race condition ttl
+  config.cache_race_condition_ttl = nil
+
+  # more details about cache options:
+  # http://guides.rubyonrails.org/caching_with_rails.html
 end

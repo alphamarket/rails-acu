@@ -14,7 +14,7 @@ module Acu
     @@use_cache = false
 
     mattr_accessor :cache_namespace
-    @@cache_namespace = nil
+    @@cache_namespace = 'acu'
 
     mattr_accessor :cache_expires_in
     @@cache_expires_in = nil

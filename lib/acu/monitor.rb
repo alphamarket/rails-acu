@@ -99,6 +99,11 @@ module Acu
         e[:callback].call(*e[:args].map { |i| kwargs[i] })
       end
 
+      def clear_cache
+        return if not Configs.get :use_cache
+        Rails.cache.clear namespace: (Configs.get :cache_namespace)
+      end
+
       protected
 
       def hit_cache _info
@@ -109,21 +114,21 @@ module Acu
         # fetch the cache-name
         cname = cache_name _info, _entitled_entities
         # return [didn't hit] if not found in cache
-        return false if not Raile.cache.exists? cname, cache_options
+        return false if not Rails.cache.exist? cname, cache_options
         # check if the request is allowed in cache?
-        if is_allowed?(Raile.cache.read(cname, cache_options).to_s.to_sym)
+        if is_allowed?(Rails.cache.read(cname, cache_options).to_s.to_sym)
           # grant the access
-          access_granted _info, _entitled_entities, from_cache: true
+          access_granted _info, _entitled_entities.keys, from_cache: true
         else
           # deny the access
-          access_denied _info, _entitled_entities, from_cache: true
+          access_denied _info, _entitled_entities.keys, from_cache: true
         end
         # hit the cache
         return true
       end
 
       def cache_name _info, entities
-        "%s-%s" %[_info.to_a.join('::'), entities.keys.join("-")]
+        "%s-%s" %[_info.to_a.join('::'), (entities.kind_of?(Array) ? entities : entities.keys).join("-")]
       end
 
       def is_allowed? action
@@ -154,7 +159,7 @@ module Acu
 
       def access_granted _info, entities, by_default: false, from_cache: false
         # log the event
-        log_audit ("[-]%s access GRANTED to `#{_info.to_s}` as `:#{entities.uniq.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : "") %[from_cache ? '[c]' : ''])
+        log_audit ("[-]" + (from_cache ? '[c]' : '') + " access GRANTED to `#{_info}` as `:#{entities.uniq.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
         # cache the event if not already from cache
         Rails.cache.write(cache_name(_info, entities), Rules.GRANT_SYMBOL, cache_options) if not from_cache and Configs.get :use_cache
         # grant the access
@@ -163,7 +168,7 @@ module Acu
 
       def access_denied _info, entities, by_default: false, from_cache: false
         # log the event
-        log_audit ("[x]%s access DENIED to `#{_info.to_s}` as `:#{entities.uniq.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : "") %[from_cache ? '[c]' : ''])
+        log_audit ("[x]" + (from_cache ? '[c]' : '') + " access DENIED to `#{_info}` as `:#{entities.uniq.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
         # cache the event if not already from cache
         Rails.cache.write(cache_name(_info, entities), Rules.DENY_SYMBOL, cache_options) if not from_cache and Configs.get :use_cache
         # deny the access
