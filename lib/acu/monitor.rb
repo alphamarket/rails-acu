@@ -16,7 +16,11 @@ module Acu
       end
 
       def gaurd
+        # fetch the request & process it
         _info = process Acu::Listeners.data[:request]
+
+        return if hit_cache _info
+
         rules = Rules.rules.select do |cond, _|
           flag = true;
 
@@ -52,35 +56,33 @@ module Acu
         end
         # flag so we can process all the related rule and it all passed this should be false
         # if any failed, and exception will be raised
-        _granted = false
-        _granted_entities = [];
+        _granted = -1
+        _entitled_entities = [];
         # for each mached rule
         rules.each do |_, rule|
           # for each entity and it's actions in the rule
           rule.each do |entity, action|
             # check it the current request can relay to the entity?
-            if valide_for? entity
-              case action
-              when :allow
-                _granted_entities << entity.to_s
-                _granted = true
-              when :deny
-                access_denied  _info, entity
+            if valid_for? entity
+              _entitled_entities << entity.to_s
+
+              if is_allowed? action
+                _granted = 1 if _granted == -1
               else
-                log_audit "> access DENIED to undefined entity as `:#{entity}` to `#{_info.to_s}`"
-                raise Exception.new("action `#{action}` for access `#{_info.to_s}` undefined!")
+                _granted = 0
               end
             end
           end
         end
         # if the access is granted? i.e if all the rules are satisfied with the request
-        return if _granted and access_granted _info, _granted_entities.join(", :")
+        return if _granted == 1 and access_granted _info, _entitled_entities.uniq.join(", :")
+        return if _granted == 0 and access_denied  _info, _entitled_entities.uniq.join(", :")
         # if we reached here it measn that have found no rule to deny/allow the request and we have to fallback to the defaults
         access_denied  _info, :__ACU_BY_DEFAULT__, by_default: true if not Configs.get :allow_by_default
         access_granted _info, :__ACU_BY_DEFAULT__, by_default: true
       end
 
-      def valide_for? entity
+      def valid_for? entity
         # check for existance
         raise Errors::MissingEntity.new("whois :#{entity}?") if not Rules.entities[entity]
         # fetch the entity's identity
@@ -94,6 +96,27 @@ module Acu
       end
 
       protected
+
+      def hit_cache _info
+        cname = cache_name _info, Rules.entities.select { |name, _| valid_for? name }
+        false
+      end
+
+      def cache_name _info, entities
+        "acu-" + _info.to_a.join('::') + '-' + entities.keys.join("-")
+      end
+
+      def is_allowed? action
+        case action
+        when :allow
+          return true
+        when :deny
+          return false
+        else
+          log_audit "> access DENIED to undefined entity as `:#{entity}` to `#{_info.to_s}`"
+          raise Exception.new("action `#{action}` for access `#{_info.to_s}` undefined!")
+        end
+      end
 
       def log_audit log
         file = Configs.get :audit_log_file
