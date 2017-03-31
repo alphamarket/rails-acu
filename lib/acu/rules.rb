@@ -6,11 +6,16 @@ module Acu
     @rules = { }
     @entities = { }
 
+    @GRANT_SYMBOL = :allow
+    @DENY_SYMBOL  = :deny
+
     class << self
 
       protected :new
       attr_reader :rules
       attr_reader :entities
+      attr_reader :GRANT_SYMBOL
+      attr_reader :DENY_SYMBOL
 
       include Utilities
 
@@ -80,11 +85,11 @@ module Acu
       ###################################################
 
       def allow symbol, on: []
-        op symbol, :allow, on
+        op symbol, @GRANT_SYMBOL, on
       end
 
       def deny symbol, on: []
-        op symbol, :deny, on
+        op symbol, @DENY_SYMBOL, on
       end
 
       ################### end of ops ####################

@@ -11,4 +11,8 @@ Acu.setup do |config|
   # the audit log file, to log how the requests handles, good for production
   # leave it black for nil to disable the logging
   config.audit_log_file   = ""
+
+  # cache the rules to make your site faster
+  # it's not recommanded to use it in developement/test evn.
+  config.use_cache = false
 end
