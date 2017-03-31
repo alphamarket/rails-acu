@@ -377,6 +377,21 @@ RSpec.describe HomeController, type: :controller do
           expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
           expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="contact".*\[autherized by :allow_by_default\]/
         end
+        it '[local-global]' do
+          Acu::Rules.define do
+            whois :everyone { true }
+            namespace do
+              allow :everyone
+              controller :home, only: [:index] do
+                deny :everyone
+              end
+            end
+          end
+          get :contact
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="contact".*as `:everyone`/
+          expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="index".*as `:everyone`/
+        end
       end
 
       context "[allow/deny]" do

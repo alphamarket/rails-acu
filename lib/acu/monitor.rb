@@ -12,7 +12,11 @@ module Acu
       attr_reader :kwargs
 
       def by kwargs
-        @kwargs = kwargs
+        @kwargs = @kwargs.merge(kwargs)
+      end
+
+      def clear_args
+        @kwargs = { }
       end
 
       def gaurd
@@ -94,7 +98,7 @@ module Acu
         # fetch the related args to the entity from the `kwargs`
         kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
         # if fetched args and pre-defined arg didn't match?
-        raise Errors::MissingData.new("at least one of arguments for `whois :#{entity}` in `#{_info.to_s}` is not provided!") if kwargs.length != e[:args].length
+        raise Errors::MissingData.new("at least one of arguments for `whois :#{entity}` is not provided!") if kwargs.length != e[:args].length
         # send varibles in order the have defined
         e[:callback].call(*e[:args].map { |i| kwargs[i] })
       end
