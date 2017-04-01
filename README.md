@@ -124,10 +124,6 @@ One of the files that `acu:install` command will generate is `acu_setup.rb` whic
 
 ```ruby
 Acu.setup do |config|
-  # name it to the Base Application Controller that your project
-  # is going to use as a base of all of your controllers.
-  config.base_controller = :ApplicationController
-
   # to tighten the security this is enabled by default
   # i.e if it checked to be true, then if a request didn't match to any of rules, it will get passed through
   # otherwise the requests which don't fit into any of rules, the request is denied by default
@@ -159,7 +155,6 @@ Here are the details of the configurations:
 
 | Name | Default | Description |
 | ----- |-------| ------ |
-| base_controller | `:ApplicationController` | In order that ACU gem to work it will attach some utilities to the base controller of all controllers, so if your base controller's name is something else change it. |
 | allow_by_default | `false` | Set it `true` if you want to grant access to requests that doesn't fit to any rules you have defined (**Warning:** please be advised, setting it `true` may cause a security hole in your website if you don't cover the rules perfectly!). |
 | audit_log_file |  | The audit log file, useful for rules debugging! |
 | use_cache | `false` | ACU can utilize the `Rails.cache` to make the rules matching much faster by caching them, but if caching is enabled and you change the please make user you have cleared the ACU caches by `Acu::Monitor.clear_cache`. |
