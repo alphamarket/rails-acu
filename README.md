@@ -97,7 +97,7 @@ class ApplicationController < ActionController::Base
   before_action { Acu::Monitor.gaurd by: { user: some_way_to_fetch_it } }
 end
 ```
-The method `Acu::Monitor.by` accepts with a hashed list of agruments, please note that the keys should be identical to the entities' `args` argument.
+The method `Acu::Monitor.gaurd` accepts with a hashed list of agruments named `by`, please note that the keys should be identical to the entities' `args` argument.
 
 ### Some handy helpers
 Although you can define a binary allow/deny access rule in the `acu_rules.rb` file but there will be some gray area that neither you can allow _full access_ to the resource nor _no access_.<br />
@@ -166,11 +166,10 @@ Here are the list of APIs that didn't mentioned above:
 | API | Arguments | Alias | Description |
 | ----- | :-------: | :------: | ---- |
 | `Acu::Configs.get` | `name` | N/A | Get the value of the `name`ed config |
-| `Acu::Monitor.by` | `kwargs` | N/A | Set the arguments demaned by blocks in `whois` |
 | `Acu::Monitor.clear_cache` | None | N/A | Clears the ACU's rule matching cache |
-| `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.by` |
+| `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.gaurds` |
 | `Acu::Monitor.valid_for?` | `entity` | `acu_is?` | Check if the current request is come from the entity or not |
-| `Acu::Monitor.gaurd` | None | N/A | Validates the current request, this is called automatically just before Rails start calling the _action_ |
+| `Acu::Monitor.gaurd` | `by` | N/A | Validates the current request, considering the arguments demaned by blocks in `whois` |
 | `Acu::Rules.define` | `&block` | N/A | Get a block of rules, **Note** that there could be mutliple `Acu::Rules.define` in your project, the rules will all merge together as a one, so you can have mutliple `acu_rule*.rb` file in your `config/initialize` and they will merge together |
 | `Acu::Rules.reset` | None | N/A | Resets everything in the `Acu::Rules` |
 | `Acu::Rule.lock` | None | N/A | Freezes the rules, you can set it at the _end of the last_ `acu_rule*.rb` file. |
