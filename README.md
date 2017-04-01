@@ -166,8 +166,9 @@ Here are the list of APIs that didn't mentioned above:
 | API | Arguments | Alias | Description |
 | ----- | :-------: | :------: | ---- |
 | `Acu::Configs.get` | `name` | N/A | Get the value of the `name`ed config |
+| `Acu::Monitor.args` | `kwargs` | N/A | Set the arguments demaned by blocks in `whois` |
 | `Acu::Monitor.clear_cache` | None | N/A | Clears the ACU's rule matching cache |
-| `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.gaurds` |
+| `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.by` |
 | `Acu::Monitor.valid_for?` | `entity` | `acu_is?` | Check if the current request is come from the entity or not |
 | `Acu::Monitor.gaurd` | `by` | N/A | Validates the current request, considering the arguments demaned by blocks in `whois` |
 | `Acu::Rules.define` | `&block` | N/A | Get a block of rules, **Note** that there could be mutliple `Acu::Rules.define` in your project, the rules will all merge together as a one, so you can have mutliple `acu_rule*.rb` file in your `config/initialize` and they will merge together |
