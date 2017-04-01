@@ -7,7 +7,6 @@ RSpec.describe Admin::ManageController, type: :controller do
     Acu::Rules.reset
     # reset configs
     Acu.setup do |config|
-      config.base_controller  = :ApplicationController
       config.allow_by_default = false
       config.audit_log_file   = '/tmp/acu-rspec.log'
     end

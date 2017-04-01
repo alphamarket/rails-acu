@@ -7,7 +7,6 @@ RSpec.describe HomeController, type: :controller do
     Acu::Rules.reset
     # reset configs
     Acu.setup do |config|
-      config.base_controller  = :ApplicationController
       config.allow_by_default = false
       config.audit_log_file   = '/tmp/acu-rspec.log'
       config.use_cache = false
@@ -24,11 +23,6 @@ RSpec.describe HomeController, type: :controller do
   end
 
   context 'Acu::Config' do
-    it '.base_controller' do
-      setup base_controller: ":FooBarController"
-      expect {get :index}.to raise_error(NameError)
-    end
-
     it '.allow_by_default = false' do
       expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
     end
