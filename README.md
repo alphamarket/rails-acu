@@ -87,8 +87,8 @@ We want to grant access to everyone for all of _home_ controller actions in _def
 By default only `:admin` can access to the _admin_ namespace, but we made an exception for 2 actions in the `Admin::ContactController` which everyone can `send_message` to the admin and only clients can ask for `support`.<br />
 If you back trace it in the above example you can easily find this scenario in the rules, plain and simple.
 
-### Entities' arguments
-Occasionally there is some situation that you need to pass the some argument in the entities to be able to determine the entity (i.e you cannot get it from `session`, `global variables/function` or directly from `database`) for such situations you can pass the arguments in one of the **base controller**'s `before_action`s as below:
+### Gaurding the requests
+For gaurding you application using ACU, you to need to call it in `before_action` callbacks (preferably in you **base controller**). And also occasionally there is some situation that you need to pass the some argument in the entities to be able to determine the entity (i.e you cannot get it from `session`, `global variables/function` or directly from `database`) for such situations you can pass the arguments as you are calling `Acu::Monitor.gaurd` in your `before_action` as below:
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -97,7 +97,7 @@ class ApplicationController < ActionController::Base
   before_action { Acu::Monitor.gaurd by: { user: some_way_to_fetch_it } }
 end
 ```
-The method `Acu::Monitor.gaurd` accepts with a hashed list of agruments named `by`, please note that the keys should be identical to the entities' `args` argument.
+The method `Acu::Monitor.gaurd` accepts a hashed list of agruments named `by`, please note that the keys should be identical to the entities' `args` argument.
 
 ### Some handy helpers
 Although you can define a binary allow/deny access rule in the `acu_rules.rb` file but there will be some gray area that neither you can allow _full access_ to the resource nor _no access_.<br />
@@ -168,7 +168,7 @@ Here are the list of APIs that didn't mentioned above:
 | `Acu::Configs.get` | `name` | N/A | Get the value of the `name`ed config |
 | `Acu::Monitor.args` | `kwargs` | N/A | Set the arguments demaned by blocks in `whois` |
 | `Acu::Monitor.clear_cache` | None | N/A | Clears the ACU's rule matching cache |
-| `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.by` |
+| `Acu::Monitor.clear_args` | None | N/A | Clears the argument set by `Acu::Monitor.args` and `Acu::Monitor.gaurd` |
 | `Acu::Monitor.valid_for?` | `entity` | `acu_is?` | Check if the current request is come from the entity or not |
 | `Acu::Monitor.gaurd` | `by` | N/A | Validates the current request, considering the arguments demaned by blocks in `whois` |
 | `Acu::Rules.define` | `&block` | N/A | Get a block of rules, **Note** that there could be mutliple `Acu::Rules.define` in your project, the rules will all merge together as a one, so you can have mutliple `acu_rule*.rb` file in your `config/initialize` and they will merge together |
