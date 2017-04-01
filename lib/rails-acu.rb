@@ -1,5 +1,6 @@
 require 'rails'
 require 'active_support'
+require_relative 'acu/helpers/helpers'
 
 module Acu
 
@@ -9,7 +10,7 @@ module Acu
     files.each { |f| eval "#{command} :#{f.humanize.to_sym}, '#{under}#{f}'" }
   end
 
-  register 'engine', 'rules', 'monitor', 'listeners', 'injectors', 'configs', 'errors'
+  register 'engine', 'rules', 'monitor', 'listeners', 'configs', 'errors'
 
   # Default way to set up Acu. Run rails generate devise_install to create
   # a fresh initializer with all configuration values.
@@ -21,6 +22,4 @@ module Acu
   include Errors
   # include listeners
   include Listeners
-  # include Injector operations
-  include Injectors
 end

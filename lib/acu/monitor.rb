@@ -11,7 +11,7 @@ module Acu
       protected :new
       attr_reader :kwargs
 
-      def by kwargs
+      def args kwargs
         @kwargs = @kwargs.merge(kwargs)
       end
 
@@ -19,7 +19,10 @@ module Acu
         @kwargs = { }
       end
 
-      def gaurd
+      def gaurd by: { }
+        # assign the args in class scope
+        args by
+
         # fetch the request & process it
         _info = process Acu::Listeners.data[:request]
 

@@ -56,15 +56,15 @@ RSpec.describe Admin::ManageController, type: :controller do
         end
       end
     end
-    Acu::Monitor.by c: :admin
+    Acu::Monitor.args c: :admin
     get :index
     expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*action="index".*as `:admin`/
-    Acu::Monitor.by c: :client
+    Acu::Monitor.args c: :client
     expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
     expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*action="index".*\[autherized by :allow_by_default\]/
 
     [:client, :admin].each do |cc|
-      Acu::Monitor.by c: cc
+      Acu::Monitor.args c: cc
       get :show
     end
   end
