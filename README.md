@@ -94,7 +94,7 @@ Occasionally there is some situation that you need to pass the some argument in 
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
-  before_action { Acu::Monitor.by user: some_way_to_fetch_it }
+  before_action { Acu::Monitor.gaurd by: { user: some_way_to_fetch_it } }
 end
 ```
 The method `Acu::Monitor.by` accepts with a hashed list of agruments, please note that the keys should be identical to the entities' `args` argument.
