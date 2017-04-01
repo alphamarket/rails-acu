@@ -25,7 +25,7 @@ $ gem install rails-acu
 Then install it in you app using:
 
 ```bash
-rails generate acu:install
+$ rails generate acu:install
 ```
 
 ## Usage
