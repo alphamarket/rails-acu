@@ -214,6 +214,26 @@ class Acu::Errors::MissingController < MissingData
 class Acu::Errors::MissingNamespace < MissingData
 ```
 
+## Known contributions subjects to work on 
+
+### Implementing to overriding the rules in inner loops:
+Consider we have to give the everyone to access the default namespace except `:profile` controller which will only allow by signed in users, although there are tools provided
+for this purpose, such as `except` and `only` tags on `controller` and `namespace` but it would be nice if there are such a command like `override` which its skeleton has been
+defined in the `Acu::Rules.override` which enables the previously defined rule to be overrided, the following pseudo-example removes the `allow :everyone` rule from the controller
+`profile`:
+
+```ruby
+  # config/initializers/acu_rules.rb
+  [...]
+  namespace do
+    allow :everyone
+    controller :profiles do
+      override :everyone
+      allow :signed_in
+    end
+  end
+  [...]
+```
 
 
 ## Contributing
