@@ -97,6 +97,10 @@ module Acu
         op *symbol, @DENY_SYMBOL, on
       end
 
+      def override *symbol, with:, on: []
+        raise Exception.new('not implemented!');
+      end
+
       ################### end of ops ####################
 
       protected
