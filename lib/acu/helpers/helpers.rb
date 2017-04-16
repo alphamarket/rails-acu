@@ -7,3 +7,7 @@ end
 def acu_as symbol
   yield if acu_is? symbol
 end
+
+def acu_except symbol
+  yield if not acu_is? symbol
+end

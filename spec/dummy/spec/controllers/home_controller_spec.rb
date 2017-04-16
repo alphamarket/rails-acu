@@ -526,7 +526,7 @@ RSpec.describe HomeController, type: :controller do
       expect(acu_is? :everyone).to be true
       expect(acu_is? :client).to be false
     end
-    it "acu_do" do
+    it "acu_as" do
       Acu::Rules.define do
         whois :everyone { true }
         whois :client { false }
@@ -542,6 +542,24 @@ RSpec.describe HomeController, type: :controller do
       # the :everyone should get true
       acu_as [:client, :everyone] do
         expect(acu_is? :everyone).to be true
+      end
+    end
+    it "acu_except" do
+      Acu::Rules.define do
+        whois :everyone { true }
+        whois :client { false }
+      end
+      acu_except :everyone do
+        # an invalid syntax, this should never run
+        expect(true).not_to be true
+      end
+      acu_except :client do
+        # a valid syntax
+        expect(true).to be true
+      end
+      # no-one gets through
+      acu_except [:client, :everyone] do
+        expect(true).not_to be true
       end
     end
   end

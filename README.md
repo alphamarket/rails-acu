@@ -112,7 +112,7 @@ The method `Acu::Monitor.gaurd` accepts a hashed list of agruments named `by`, p
 
 ### Some handy helpers
 Although you can define a binary allow/deny access rule in the `acu_rules.rb` file but there will be some gray area that neither you can allow _full access_ to the resource nor _no access_.<br />
-for those situations you allow the entities to get access but limits their operations in the action/view/layout with the `acu_is?` and `acu_as` helpers, here is some usage example of them:
+For those situations you allow the entities to get access but limits their operations in the action/view/layout with the `acu_is?`, `acu_as` and `acu_except` helpers, here is some usage example of them:
 
 ```ruby
 # return true if the entity `:admin`'s block in `whois :admin` return true, otherwise false
@@ -127,6 +127,11 @@ end
 # executes the block if current user identified as either `:admin` or `:client`
 acu_as [:admin, :client] do
   puts 'You are either `admin` or `client`'
+end
+
+# DO NOT executes the block if current user identified as either `:guest`
+acu_except [:guest] do 
+  puts 'Except `:guest`s anyone else can execute this code'
 end
 ```
 
