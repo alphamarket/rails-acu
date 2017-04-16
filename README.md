@@ -129,7 +129,7 @@ acu_as [:admin, :client] do
   puts 'You are either `admin` or `client`'
 end
 
-# DO NOT executes the block if current user identified as either `:guest`
+# DO NOT execute the block if current user identified as `:guest`
 acu_except [:guest] do 
   puts 'Except `:guest`s anyone else can execute this code'
 end
