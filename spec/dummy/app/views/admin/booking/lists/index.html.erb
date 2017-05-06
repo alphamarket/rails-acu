@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Admin Booking Lists</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @admin_booking_lists.each do |admin_booking_list| %>
+      <tr>
+        <td><%= admin_booking_list.name %></td>
+        <td><%= link_to 'Show', admin_booking_list %></td>
+        <td><%= link_to 'Edit', edit_admin_booking_list_path(admin_booking_list) %></td>
+        <td><%= link_to 'Destroy', admin_booking_list, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Admin Booking List', new_admin_booking_list_path %>

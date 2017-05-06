@@ -25,6 +25,7 @@ module Acu
 
       def reset
         @rules = { }
+        @_params = { }
         @entities = { }
       end
 
@@ -34,6 +35,7 @@ module Acu
         names = [nil] if names.empty?
         only = nil if only and not (only.kind_of?(Array) or only.length == 0)
         except = nil if except and not (except.kind_of?(Array) or except.length == 0)
+        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container namespace `#{@_params[:namespace].map { |i| i[:name] }.join('::')}`") if (except or only) and @_params[:namespace] and @_params[:namespace].find { |n| n[:except] or n[:only] }
         raise Errors::AmbiguousRule.new('cannot have both `only` and `except` options at the same time for namespace(s) `%s`' %names.join(', ')) if only and except
         names.each do |name|
           pass namespace: { name: name ? name.downcase : name, except: except, only: only } do
@@ -48,7 +50,8 @@ module Acu
         names = [names].flatten if name
         only = nil if only and not (only.kind_of?(Array) or only.length == 0)
         except = nil if except and not (except.kind_of?(Array) or except.length == 0)
-        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container namespace `#{@_params[:namespace][:name]}`") if @_params[:namespace] and (@_params[:namespace][:except] || @_params[:namespace][:only])
+        raise Errors::InvalidSyntax.new("nested controllers are not allowed!") if @_params[:controller] and not @_params[:controller].empty?
+        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container namespace `#{@_params[:namespace].map { |i| i[:name] }.join('::')}`") if @_params[:namespace] and @_params[:namespace].find { |n| n[:except] or n[:only] }
         raise Errors::AmbiguousRule.new('cannot have both `only` and `except` options at the same time for controller(s) `%s`' %names.join(', ')) if only and except
         names.each do |name|
           pass controller: { name: name.downcase, except: except, only: only } do
@@ -59,8 +62,9 @@ module Acu
 
       def action *names
         names = [names].flatten if name
+        raise Errors::InvalidSyntax.new("nested actions are not allowed!") if @_params[:action] and not @_params[:action].empty?
         raise Errors::AmbiguousRule.new("at least one of the parent `controller` or `namespace` needs to be defined for the this action") if not (@_params[:namespace] || @_params[:controller])
-        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container controller(s) `#{@_params[:controller][:name]}`") if @_params[:controller] and (@_params[:controller][:except] || @_params[:controller][:only])
+        raise Errors::AmbiguousRule.new("there is already an `except` or `only` constraints defined in container controller(s) `#{@_params[:controller].map { |i| i[:name] }.join('::')}`") if @_params[:controller] and @_params[:controller].find { |n| n[:except] or n[:only] }
         names.each do |name|
           pass action: { name: name.downcase } do
             yield
@@ -120,8 +124,8 @@ module Acu
       end
 
       def build_rule rule
-        @rules[@_params.clone] ||= {}
-        @rules[@_params.clone] = rules[@_params.clone].merge(rule);
+        @rules[@_params.deep_dup] ||= {}
+        @rules[@_params.deep_dup] = rules[@_params.clone].merge(rule);
       end
 
       def build_rule_entry

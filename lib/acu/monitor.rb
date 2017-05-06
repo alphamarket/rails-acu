@@ -38,16 +38,24 @@ module Acu
           {namespace: nil, controller: :namespace, action: :controller}.each do |current, parent|
             t = -1
             # either mentioned explicitly
-            if cond[current]
-              t = (cond[current][:name].to_s == eval("_info.#{current}").to_s) ? 1 : 0
+            if cond[current] and not cond[current].empty?
+              # hierarchical match `_info[current]` with `cond[current]` to support nested namespace (since v3.0.0)   
+              cond[current].map { |c| c[:name].to_s }.each.with_index do |c, index|
+                t = (c == eval("_info.#{current}")[index].to_s) ? 1 : 0
+                break if t == 0
+              end
             # or in `only|except` tags
-            elsif parent and cond[parent]
+            elsif parent and cond[parent] and not cond[parent].empty?
               # if nothing mentioned in parent, assume for all
-              t = 1 if not(cond[parent][:only] or cond[parent][:except])
+              t = 1 if not cond[parent].map { |c| c[:only] or c[:except] }.all?
               # flag true if it checked in namespace's only tag
               {only: {on_true: 1, on_false: 0} , except: {on_true: 0, on_false: 1}}.each do |tag, val|
-                if cond[parent][tag]
-                  case cond[parent][tag].include? eval("_info.#{current}").to_sym
+                # fetch all `tag` names
+                tag_list = cond[parent].map { |c| c[tag] }.flatten - [nil]
+                # if any tag is present?
+                if not tag_list.empty? and tag_list.any?
+                  # if `current` is mentioned in `tag_list`? 
+                  case not (tag_list.map(&:to_s) & eval("_info.#{current}").map(&:to_s)).empty?
                   when true
                     t = val[:on_true]
                     break
@@ -189,13 +197,13 @@ module Acu
         p = request[:parameters]
         # try find the namespace/controller set
         nc = p["controller"].split('/');
-
-        n = nc.length > 1 ? nc.first : nil
-        c = nc.length > 1 ? nc.second : nc.first
+        # considering multi layer namespaces
+        n = nc.length > 1 ? nc[0..-2] : nil
+        c = nc.length > 1 ? nc.last : nc.first
         a = p["action"]
 
         # return it with structure
-        Struct.new(:namespace, :controller, :action).new(n, c, a)
+        Struct.new(:namespace, :controller, :action).new([n].flatten, [c].flatten, [a].flatten)
       end
 
     end # /class << self

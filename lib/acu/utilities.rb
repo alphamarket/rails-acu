@@ -6,7 +6,11 @@ module Acu
     end
     def pass args = {}
       helper_initialize
-      args.each { |k, v| @_params[k] = v }
+      args.each do |k, v| 
+        @_params[k] ||= []
+        @_params[k] << v
+        @_params[k].flatten
+      end
       yield
       args.each { |k, _| @_params.delete k }
     end

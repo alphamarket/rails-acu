@@ -1,0 +1,22 @@
+<%= form_for(admin_booking_list) do |f| %>
+  <% if admin_booking_list.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(admin_booking_list.errors.count, "error") %> prohibited this admin_booking_list from being saved:</h2>
+
+      <ul>
+      <% admin_booking_list.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

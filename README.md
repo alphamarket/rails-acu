@@ -87,6 +87,13 @@ Acu::Rules.define do
       }
     end
   end
+
+  # nested namespace (since v3.0.0)
+  namespace :admin do 
+    namespace :chat do
+      allow :client
+    end
+  end
 end
 ```
 
@@ -95,7 +102,7 @@ As we define our rules at the first line, we have to say who are the entities? _
 Once we defined our entities we can set their binary access permissions at namespace/controller/action levels using `allow` and `deny` helpers. **that is it, we are done tutorialing; from now on is just tiny details. :)**
 
 > **Scenario:** We have a *public* site which serves to its client's; we have 2 namespaces on this site, one is the _default_ namespace with _home_ controller in it, and the second namespace belongs to the _admin_ of site which has many controllers and also a _contact_ controller.<br />
-We want to grant access to everyone for all of _home_ controller actions in _default_ namespace **except** the `some_secret_action1` and `some_secret_action2`; but these `some_secret_action*` can be accessed via the `:admin` and `:client` entities. By default only `:admin` can access to everywhere, but in namespace `admin` we made an exception for 2 actions in the `Admin::ContactController` which everyone can `send_message` to the admin and only clients can ask for `support`. Finally we want to grant access to everyone for _public_ controllers in our 2 namespaces _the default_ and _admin_. <br />
+We want to grant access to everyone for all of _home_ controller actions in _default_ namespace **except** the `some_secret_action1` and `some_secret_action2`; but these `some_secret_action*` can be accessed via the `:admin` and `:client` entities. By default only `:admin` can access to everywhere, but in namespace `admin` we made an exception for 2 actions in the `Admin::ContactController` which everyone can `send_message` to the admin and only clients can ask for `support`. Finally we want to grant access to everyone for _public_ controllers in our 2 namespaces _the default_ and _admin_. Also clients can access to everything in namespace _chat_.<br />
 If you back trace it in the above example you can easily find this scenario in the rules, plain and simple.
 
 ### Gaurding the requests
@@ -239,6 +246,14 @@ defined in the `Acu::Rules.override` which enables the previously defined rule t
   end
   [...]
 ```
+
+## Change Logs
+
+### v3.0.0
+* Nested namespace support
+
+### Before `v3.0.0`
+* Core functionalities implemented and stabilized
 
 
 ## Contributing

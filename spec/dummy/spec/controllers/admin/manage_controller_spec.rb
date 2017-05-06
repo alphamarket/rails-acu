@@ -28,7 +28,7 @@ RSpec.describe Admin::ManageController, type: :controller do
     end
     # we filtered the default namespace not this
     get :index
-    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace="admin".*controller="manage".*action="index".*as `:everyone`/
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\["admin"\].*controller=\["manage"\].*action=\["index"\].*as `:everyone`/
 
     Acu::Rules.define do
       namespace :admin, except: [:posts] do
@@ -39,11 +39,11 @@ RSpec.describe Admin::ManageController, type: :controller do
       end
     end
     expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
-    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace="admin".*controller="manage".*action="index".*as `:everyone`/
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\["admin"\].*controller=\["manage"\].*action=\["index"\].*as `:everyone`/
     expect {get :show}.to raise_error(Acu::Errors::AccessDenied)
-    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace="admin".*controller="manage".*action="show".*as `:everyone`/
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\["admin"\].*controller=\["manage"\].*action=\["show"\].*as `:everyone`/
     expect {get :list}.to raise_error(Acu::Errors::AccessDenied)
-    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace="admin".*controller="manage".*action="list".*as `:everyone`/
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\["admin"\].*controller=\["manage"\].*action=\["list"\].*as `:everyone`/
   end
   it '[local-global & args]' do
     Acu::Rules.define do
@@ -58,10 +58,10 @@ RSpec.describe Admin::ManageController, type: :controller do
     end
     Acu::Monitor.args c: :admin
     get :index
-    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace="admin".*controller="manage".*action="index".*as `:admin`/
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\["admin"\].*controller=\["manage"\].*action=\["index"\].*as `:admin`/
     Acu::Monitor.args c: :client
     expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
-    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace="admin".*controller="manage".*action="index".*\[autherized by :allow_by_default\]/
+    expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\["admin"\].*controller=\["manage"\].*action=\["index"\].*\[autherized by :allow_by_default\]/
 
     [:client, :admin].each do |cc|
       Acu::Monitor.args c: cc
