@@ -12,7 +12,7 @@ module Acu
         @_params[k].flatten
       end
       yield
-      args.each { |k, _| @_params.delete k }
+      args.each { |k, _| @_params[k].pop }
     end
   end
 end
