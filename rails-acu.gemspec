@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
 
   s.require_paths = ["lib"]
 
-  s.add_dependency "rails", "~> 5.0.0", '>= 5.0.0'
+  s.add_dependency "rails", ">= 5.0.0"
 end
