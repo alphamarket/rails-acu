@@ -131,7 +131,7 @@ module Acu
       			# remove the not symbol
       			not_symbol = (symbol.to_s.gsub /\Anot_/, "").to_sym
     				# add the negated symbol
-      			whois(symbol, args: @entities[not_symbol][:args]) { not @entities[not_symbol][:callback].call(*@entities[not_symbol][:args].map { |i| kwargs[i] }) }
+      			whois(symbol, args: @entities[not_symbol][:args]) { |*args| not @entities[not_symbol][:callback].call(*args) }
       		end
       	end
       end
