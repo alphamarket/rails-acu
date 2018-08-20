@@ -94,6 +94,14 @@ Acu::Rules.define do
       allow :client
     end
   end
+
+  # negated entities (since v3.0.4)
+  namespace do
+    controller :profile do
+      # only owners can edit the profile page
+      deny :not_owner, on: [:edit]
+    end
+  end
 end
 ```
 

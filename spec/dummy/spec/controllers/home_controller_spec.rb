@@ -428,6 +428,32 @@ RSpec.describe HomeController, type: :controller do
         expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
       end
+      it "[negated entities]" do
+        Acu::Rules.define do
+          whois :everyone { true }
+          whois :client { false }
+          namespace do
+            controller :home do
+              deny :not_client, on: [:index, :contact]
+            end
+          end
+        end
+        expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:not_client`/
+        expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:not_client`/
+        Acu::Rules.define do
+          namespace do
+            controller :home do
+              allow :not_client, on: [:index, :contact]
+            end
+          end
+        end
+        get :index
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:not_client`/
+        get :contact
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:not_client`/
+      end
     end
     context "[bulk settings]" do
       it "[allow/deny]" do

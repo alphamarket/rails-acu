@@ -111,6 +111,7 @@ module Acu
 
       def op *symbol, opr, on
         symbol = symbol.flatten
+        process_symbol *symbol
         raise Errors::InvalidData.new("invalid argument") if not symbol or symbol.to_s.blank? or opr.to_s.blank?
         raise Errors::AmbiguousRule.new("cannot have `on` argument inside the action `#{@_params[:action][:name]}`") if not on.empty? and (@_params[:action] and not @_params[:action].empty?)
         raise Errors::InvalidData.new("the symbol `#{symbol}` is not defined by `whois`") if not symbol.all? { |s| @entities.include? s }
@@ -123,9 +124,23 @@ module Acu
         end
       end
 
-      def build_rule rule
+      def process_symbol *symbols
+      	symbols.each do |symbol|
+      		# check if negated symbol used?
+      		if symbol.to_s.downcase =~ /\Anot_/ and not @entities.include?(symbol)
+      			# remove the not symbol
+      			not_symbol = (symbol.to_s.gsub /\Anot_/, "").to_sym
+    				# add the negated symbol
+      			whois(symbol, args: @entities[not_symbol][:args]) { not @entities[not_symbol][:callback].call(*@entities[not_symbol][:args].map { |i| kwargs[i] }) }
+      		end
+      	end
+      end
+
+      def build_rule *_rules
         @rules[@_params.deep_dup] ||= {}
-        @rules[@_params.deep_dup] = rules[@_params.clone].merge(rule);
+        _rules.each do |rule|
+        	@rules[@_params.deep_dup] = @rules[@_params.clone].merge(rule);
+        end
       end
 
       def build_rule_entry
