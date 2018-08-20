@@ -17,6 +17,9 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
+# to fix security bug CVE-2018-3760
+gem 'sprockets', '~> 3.7.2'
+
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
 
