@@ -1,4 +1,4 @@
-def acu_is? symbol
+def acu_is? *symbol
   flag = false
   [symbol].flatten.each do |s| 
   	if s.to_s =~ /\Anot_/
@@ -10,10 +10,10 @@ def acu_is? symbol
   flag
 end
 
-def acu_as symbol
+def acu_as *symbol
   yield if acu_is? symbol
 end
 
-def acu_except symbol
+def acu_except *symbol
   yield if not acu_is? symbol
 end
