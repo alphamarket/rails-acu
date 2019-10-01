@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.4.1'
+ruby '2.6.3'
 
 git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
@@ -26,7 +26,7 @@ gem 'sprockets', '~> 3.7.2'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
-  gem 'rspec-rails', '~> 3.5'
+  gem 'rspec-rails', github: 'rspec/rspec-rails', :tag => "v4.0.0.beta2"
   gem 'sqlite3'
   gem 'awesome_print', github: 'awesome-print/awesome_print'
   gem 'devise'
