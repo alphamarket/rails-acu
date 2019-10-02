@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/noise2/rails-acu.svg?branch=master)](https://travis-ci.org/noise2/rails-acu)
+[![Build Status](https://travis-ci.org/alphamarket/rails-acu.svg?branch=rails-5)](https://travis-ci.org/alphamarket/rails-acu)
 
 # ACU
 ACU is the acronym for **A**ccess **C**ontrol **U**nit, and it's designed to give the 100% control over permissions on multiple levels of rails application's structure.
