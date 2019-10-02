@@ -50,15 +50,15 @@ RSpec.describe HomeController, type: :controller do
     context "[globals]" do
       it "[single rule]" do
         Acu::Rules.define do
-          whois :everyone { true }
+          whois(:everyone) { true }
           allow :everyone
         end
         get :index
       end
       it "[multiple rules]" do
         Acu::Rules.define do
-          whois :everyone { true }
-          whois :client { true }
+          whois(:everyone) { true }
+          whois(:client) { true }
           allow :everyone
           allow :client
         end
@@ -69,8 +69,8 @@ RSpec.describe HomeController, type: :controller do
       end
       it "{ one of rules failed = AccessDenied }" do
         Acu::Rules.define do
-          whois :everyone { true }
-          whois :client { true }
+          whois(:everyone) { true }
+          whois(:client) { true }
           # every request is :everyone
           allow :everyone
           # every reqyest is also :client
@@ -80,7 +80,7 @@ RSpec.describe HomeController, type: :controller do
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone, :client`/
 
         Acu::Rules.define do
-          whois :client { false }
+          whois(:client) { false }
           # every reqyest is also :client
           deny :client
         end
@@ -92,8 +92,8 @@ RSpec.describe HomeController, type: :controller do
       context "[namespace]" do
         it "[default]" do
           Acu::Rules.define do
-            whois :everyone { true }
-            whois :client { false }
+            whois(:everyone) { true }
+            whois(:client) { false }
             namespace do
               allow :everyone
             end
@@ -118,8 +118,8 @@ RSpec.describe HomeController, type: :controller do
         end
         it "[default & global]" do
           Acu::Rules.define do
-            whois :everyone { true }
-            whois :client { false }
+            whois(:everyone) { true }
+            whois(:client) { false }
 
             namespace do
               allow :everyone
@@ -132,7 +132,7 @@ RSpec.describe HomeController, type: :controller do
         end
         it "[with only]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace only: [:home] do
               allow :everyone
             end
@@ -141,7 +141,7 @@ RSpec.describe HomeController, type: :controller do
           expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
 
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             # override previous one
             namespace only: [:home] do
               deny :everyone
@@ -156,7 +156,7 @@ RSpec.describe HomeController, type: :controller do
         end
         it "[with except]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace except: [:home] do
               allow :everyone
             end
@@ -166,7 +166,7 @@ RSpec.describe HomeController, type: :controller do
           expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to .* \[autherized by :allow_by_default\]/
 
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace except: [:foobar] do
               allow :everyone
             end
@@ -179,7 +179,7 @@ RSpec.describe HomeController, type: :controller do
       context "[controller]" do
         it "[solo]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             controller :home do
             end
           end
@@ -195,7 +195,7 @@ RSpec.describe HomeController, type: :controller do
         end
         it "[with only]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             controller :home, only: [:contact] do
             end
           end
@@ -233,7 +233,7 @@ RSpec.describe HomeController, type: :controller do
         end
         it "[with except]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             controller :home, except: [:contact] do
             end
           end
@@ -267,10 +267,10 @@ RSpec.describe HomeController, type: :controller do
       context "[action]" do
         it "[parent: namespace]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace do
-              action :index   { allow :everyone }
-              action :contact { allow :everyone }
+              action(:index) { allow :everyone }
+              action(:contact) { allow :everyone }
             end
           end
           get :index
@@ -280,8 +280,8 @@ RSpec.describe HomeController, type: :controller do
 
           Acu::Rules.define do
             namespace do
-              action :index   { allow :everyone }
-              action :contact { deny :everyone }
+              action(:index) { allow :everyone }
+              action(:contact) { deny :everyone }
             end
           end
           get :index
@@ -293,7 +293,7 @@ RSpec.describe HomeController, type: :controller do
 
         it "[parent: controller]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             controller :home do
             end
           end
@@ -303,7 +303,7 @@ RSpec.describe HomeController, type: :controller do
 
           Acu::Rules.define do
             controller :home do
-              action :contact { allow :everyone }
+              action(:contact) { allow :everyone }
             end
           end
           get :contact
@@ -313,8 +313,8 @@ RSpec.describe HomeController, type: :controller do
 
           Acu::Rules.define do
             controller :home do
-              action :index { allow :everyone }
-              action :contact { deny :everyone }
+              action(:index) { allow :everyone }
+              action(:contact) { deny :everyone }
             end
           end
           get :index
@@ -323,7 +323,7 @@ RSpec.describe HomeController, type: :controller do
 
         it "[parent: namespace, controller]" do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace do
               controller :home do
               end
@@ -336,7 +336,7 @@ RSpec.describe HomeController, type: :controller do
           Acu::Rules.define do
             namespace do
               controller :home do
-                action :contact { allow :everyone }
+                action(:contact) { allow :everyone }
               end
             end
           end
@@ -348,8 +348,8 @@ RSpec.describe HomeController, type: :controller do
           Acu::Rules.define do
             namespace do
               controller :home do
-                action :index { allow :everyone }
-                action :contact { deny :everyone }
+                action(:index) { allow :everyone }
+                action(:contact) { deny :everyone }
               end
             end
           end
@@ -359,11 +359,11 @@ RSpec.describe HomeController, type: :controller do
           # reset to change namespace
           Acu::Rules.reset
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace :foobar do
               controller :home do
-                action :index { allow :everyone }
-                action :contact { deny :everyone }
+                action(:index) { allow :everyone }
+                action(:contact) { deny :everyone }
               end
             end
           end
@@ -374,7 +374,7 @@ RSpec.describe HomeController, type: :controller do
         end
         it '[local-global]' do
           Acu::Rules.define do
-            whois :everyone { true }
+            whois(:everyone) { true }
             namespace do
               allow :everyone
               controller :home, only: [:index] do
@@ -397,7 +397,7 @@ RSpec.describe HomeController, type: :controller do
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*\[autherized by :allow_by_default\]/
 
         Acu::Rules.define do
-          whois :everyone { true }
+          whois(:everyone) { true }
           namespace do
             controller :home do
               allow :everyone, on: [:index, :contact]
@@ -409,14 +409,14 @@ RSpec.describe HomeController, type: :controller do
       end
       it "[deny]" do
         Acu::Rules.define do
-          whois :everyone { true }
+          whois(:everyone) { true }
           allow :everyone
         end
         get :index
         get :contact
 
         Acu::Rules.define do
-          whois :everyone { true }
+          whois(:everyone) { true }
           namespace do
             controller :home do
               deny :everyone, on: [:index, :contact]
@@ -430,8 +430,8 @@ RSpec.describe HomeController, type: :controller do
       end
       it "[negated entities]" do
         Acu::Rules.define do
-          whois :everyone { true }
-          whois :client { false }
+          whois(:everyone) { true }
+          whois(:client) { false }
           namespace do
             controller :home do
               deny :not_client, on: [:index, :contact]
@@ -458,8 +458,8 @@ RSpec.describe HomeController, type: :controller do
     context "[bulk settings]" do
       it "[allow/deny]" do
         Acu::Rules.define do
-          whois :everyone { true }
-          whois :client { false }
+          whois(:everyone) { true }
+          whois(:client) { false }
           namespace do
             controller :home do
               allow [:everyone, :client], on: [:index, :contact]
@@ -470,7 +470,7 @@ RSpec.describe HomeController, type: :controller do
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
         get :contact
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
-        Acu::Rules.define { whois :client { true } }
+        Acu::Rules.define { whois(:client) { true } }
         get :index
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone, :client`/
         get :contact
@@ -478,7 +478,7 @@ RSpec.describe HomeController, type: :controller do
         Acu::Rules.define do
           namespace do
             controller :home do
-              action :index { deny [:everyone, :client] }
+              action(:index) { deny [:everyone, :client] }
             end
           end
         end
@@ -490,7 +490,7 @@ RSpec.describe HomeController, type: :controller do
       end
       it "[namespace/controller]" do
         Acu::Rules.define do
-          whois :everyone { true }
+          whois(:everyone) { true }
           namespace nil, :admin do
             allow :everyone
             controller :home, :manage, only: [:index] do
@@ -515,7 +515,10 @@ RSpec.describe HomeController, type: :controller do
       end
       it "[action]" do
         Acu::Rules.define do
-          whois :everyone { true }
+          whois(:pr) { false }
+          whois(:admin) { true }
+          whois(:client) { false }
+          whois(:everyone) { true }
           namespace do
             allow :everyone
           end
@@ -546,16 +549,16 @@ RSpec.describe HomeController, type: :controller do
   context "Acu::Helpers" do
     it "acu_is?" do
       Acu::Rules.define do
-        whois :everyone { true }
-        whois :client { false }
+        whois(:everyone) { true }
+        whois(:client) { false }
       end
       expect(acu_is? :everyone).to be true
       expect(acu_is? :client).to be false
     end
     it "acu_as" do
       Acu::Rules.define do
-        whois :everyone { true }
-        whois :client { false }
+        whois(:everyone) { true }
+        whois(:client) { false }
       end
       acu_as :everyone do
         # a valid syntax
@@ -572,8 +575,8 @@ RSpec.describe HomeController, type: :controller do
     end
     it "acu_except" do
       Acu::Rules.define do
-        whois :everyone { true }
-        whois :client { false }
+        whois(:everyone) { true }
+        whois(:client) { false }
       end
       acu_except :everyone do
         # an invalid syntax, this should never run
@@ -600,11 +603,14 @@ RSpec.describe HomeController, type: :controller do
     end
     it '[caches?]' do
       Acu::Rules.define do
-        whois :everyone { true }
+        whois(:pr) { false }
+        whois(:admin) { true }
+        whois(:client) { false }
+        whois(:everyone) { true }
         namespace do
           controller :home do
-            action :index { allow :everyone }
-            action :contact { deny :everyone }
+            action(:index) { allow :everyone }
+            action(:contact) { deny :everyone }
           end
         end
       end
@@ -616,38 +622,41 @@ RSpec.describe HomeController, type: :controller do
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
       end
 
-      setup use_cache: true
-      Acu::Monitor.clear_cache
+        setup use_cache: true
+        Acu::Monitor.clear_cache
 
-      # make intial accesses, and cache
-      get :index
-      expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
-
-      # both request should be ruled by cache now!
-      5.times do
+        # make intial accesses, and cache
         get :index
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
         expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
-      end
+
+        # both request should be ruled by cache now!
+        5.times do
+          get :index
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
+          expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
+        end
     end
     it '[maintains cache]' do
-      setup use_cache: true
-      Acu::Rules.define do
-        whois :everyone { true }
-        namespace do
-          controller :home do
-            action :index { allow :everyone }
-            action :contact { deny :everyone }
+        setup use_cache: true
+        Acu::Rules.define do
+          whois(:pr) { false }
+          whois(:admin) { true }
+          whois(:client) { false }
+          whois(:everyone) { true }
+          namespace do
+            controller :home do
+              action(:index) { allow :everyone }
+              action(:contact) { deny :everyone }
+            end
           end
         end
-      end
-      5.times do
-        get :index
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
-        expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
-      end
+        5.times do
+          get :index
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
+          expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
+        end
     end
   end
 end

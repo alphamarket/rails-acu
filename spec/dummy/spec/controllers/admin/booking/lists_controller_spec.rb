@@ -30,8 +30,8 @@ RSpec.describe Admin::Booking::ListsController, type: :controller do
     end
 
     Acu::Rules.define do
-      whois :admin, args: [:c] { |c| c == :admin }
-      whois :client, args: [:c] { |c| c == :client }
+      whois(:admin, args: [:c]) { |c| c == :admin }
+      whois(:client, args: [:c]) { |c| c == :client }
     end
   }
 

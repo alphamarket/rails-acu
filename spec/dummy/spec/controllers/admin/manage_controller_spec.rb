@@ -14,7 +14,7 @@ RSpec.describe Admin::ManageController, type: :controller do
 
   it "should work with namespaces" do
     Acu::Rules.define do
-      whois :everyone { true }
+      whois(:everyone) { true }
       allow :everyone
     end
     get :index
@@ -47,8 +47,8 @@ RSpec.describe Admin::ManageController, type: :controller do
   end
   it '[local-global & args]' do
     Acu::Rules.define do
-      whois :admin, args: [:c] { |c| c == :admin }
-      whois :client, args: [:c] { |c| c == :client }
+      whois(:admin, args: [:c]) { |c| c == :admin }
+      whois(:client, args: [:c]) { |c| c == :client }
       namespace :admin do
         allow :admin
         controller :manage, only: [:show] do

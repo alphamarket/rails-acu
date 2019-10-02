@@ -45,11 +45,11 @@ in this gem, resource means any of `namespace`, `controller` and `action`. here 
 # config/initializers/acu_rules.rb
 Acu::Rules.define do
   # anyone makes a request could be count as everyone!
-  whois :everyone { true }
+  whois(:everyone) { true }
 
-  whois :admin, args: [:user] { |c| c and c.user_type == :ADMIN.to_s }
+  whois(:admin, args: [:user]) { |c| c and c.user_type == :ADMIN.to_s }
 
-  whois :client, args: [:user] { |c| c and c.user_type == :PUBLIC.to_s }
+  whois(:client, args: [:user]) { |c| c and c.user_type == :PUBLIC.to_s }
 
   # admin can access to everywhere
   allow :admin
@@ -82,7 +82,7 @@ Acu::Rules.define do
     end
 
     controller :contact do
-      action :support {
+      action(:support) {
         allow :client
       }
     end
@@ -130,12 +130,12 @@ Although you can define a binary allow/deny access rule in the `acu_rules.rb` fi
 For those situations you allow the entities to get access but limits their operations in the action/view/layout with the `acu_is?`, `acu_as` and `acu_except` helpers, here is some usage example of them:
 
 ```ruby
-# return true if the entity `:admin`'s block in `whois :admin` return true, otherwise false
+# return true if the entity `:admin`'s block in `whois(:admin)` return true, otherwise false
 acu_is? :admin
 # returns true if any of the given entity's block return true; if none of the was valid, returns false.
 acu_is? [:admin, :client]
 
-# executes the block if current user identified as an admin by `whois :admin`
+# executes the block if current user identified as an admin by `whois(:admin)`
 acu_as :admin do
   puts 'You are identified as an `admin`'
 end

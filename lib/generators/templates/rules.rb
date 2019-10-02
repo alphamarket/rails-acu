@@ -1,10 +1,10 @@
 # This is an examble, modify it as well
 Acu::Rules.define do
   # anyone makes a request could be count as everyone!
-  whois :everyone { true }
+  whois(:everyone) { true }
 
-  # whois :admin, args: [:user] { |c| c and c.user_type.symbol == :ADMIN.to_s }
-  # whois :client, args: [:user] { |c| c and c.user_type.symbol == :PUBLIC.to_s }
+  # whois(:admin, args: [:user]) { |c| c and c.user_type.symbol == :ADMIN.to_s }
+  # whois(:client, args: [:user]) { |c| c and c.user_type.symbol == :PUBLIC.to_s }
 
   # admin can access anywhere
   # allow :admin
@@ -38,7 +38,7 @@ Acu::Rules.define do
   #   end
 
   #   controller :contact do
-  #     action :support {
+  #     action(:support) {
   #       allow :client
   #     }
   #   end

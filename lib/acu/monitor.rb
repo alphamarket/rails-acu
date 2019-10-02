@@ -103,13 +103,13 @@ module Acu
 
       def valid_for? entity
         # check for existance
-        raise Errors::MissingEntity.new("whois :#{entity}?") if not Rules.entities[entity]
+        raise Errors::MissingEntity.new("whois(:#{entity})?") if not Rules.entities[entity]
         # fetch the entity's identity
         e = Rules.entities[entity]
         # fetch the related args to the entity from the `kwargs`
         kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
         # if fetched args and pre-defined arg didn't match?
-        raise Errors::MissingData.new("at least one of arguments for `whois :#{entity}` is not provided!") if kwargs.length != e[:args].length
+        raise Errors::MissingData.new("at least one of arguments for `whois(:#{entity})` is not provided!") if kwargs.length != e[:args].length
         # send varibles in order the have defined
         e[:callback].call(*e[:args].map { |i| kwargs[i] })
       end
