@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.org/noise2/rails-acu.svg?branch=master)](https://travis-ci.org/noise2/rails-acu)
 
+> ### Note:
+> This branch is maintained for **Rails v6.*** and **Ruby v2.6.*** for *Rails v5.** please use `rails-5` branch.
+
 # ACU
 ACU is the acronym for **A**ccess **C**ontrol **U**nit, and it's designed to give the 100% control over permissions on multiple levels of rails application's structure.
 The software engineering of this gem tends to make it much faster and simple. All you have to do is to define the **entities** of your authentications (i.e `what is who?`)
