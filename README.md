@@ -260,10 +260,14 @@ defined in the `Acu::Rules.override` which enables the previously defined rule t
 
 ## Change Logs
 
-### v3.0.0
+### v4.0
+* Moved to Rails 6 & Ruby 2.6.
+* More effective & robust permission caching & checking.
+
+### v3.0
 * Nested namespace support
 
-### Before `v3.0.0`
+### Before `v3.0`
 * Core functionalities implemented and stabilized
 
 
