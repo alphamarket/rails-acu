@@ -23,6 +23,14 @@ RSpec.describe HomeController, type: :controller do
     end
   end
 
+  def enable_caching
+    caching = ActionController::Base.perform_caching
+    ActionController::Base.perform_caching = true
+    yield
+  ensure
+    ActionController::Base.perform_caching = caching
+  end
+  
   context 'Acu::Config' do
     it '.allow_by_default = false' do
       expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
@@ -622,6 +630,7 @@ RSpec.describe HomeController, type: :controller do
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
       end
 
+      enable_caching do
         setup use_cache: true
         Acu::Monitor.clear_cache
 
@@ -636,27 +645,29 @@ RSpec.describe HomeController, type: :controller do
           expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
           expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
         end
+      end
     end
     it '[maintains cache]' do
-        setup use_cache: true
-        Acu::Rules.define do
-          whois(:pr) { false }
-          whois(:admin) { true }
-          whois(:client) { false }
-          whois(:everyone) { true }
-          namespace do
-            controller :home do
-              action(:index) { allow :everyone }
-              action(:contact) { deny :everyone }
-            end
+      setup use_cache: true
+      Acu::Rules.define do
+        whois(:pr) { false }
+        whois(:admin) { true }
+        whois(:client) { false }
+        whois(:everyone) { true }
+        namespace do
+          controller :home do
+            action(:index) { allow :everyone }
+            action(:contact) { deny :everyone }
           end
         end
-        5.times do
-          get :index
-          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
-          expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
-          expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
-        end
+      end
+      
+      5.times do
+        get :index
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[-\]\[c\] access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone`/
+        expect {get :contact}.to raise_error(Acu::Errors::AccessDenied)
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /\[x\]\[c\] access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
+      end
     end
   end
 end

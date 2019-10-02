@@ -83,15 +83,20 @@ module Acu
               _entitled_entities << entity.to_s
               # current entity is granted to have the access?
               if is_allowed? action
+                # cache the permision for the entity
+                cache_access _info, _entitled_entities[-1], Rules.GRANT_SYMBOL
                 # grant the access if already not denied
                 _granted = 1 if _granted == -1
               else
+                # cache the permision for the entity
+                cache_access _info, _entitled_entities[-1], Rules.DENY_SYMBOL
                 # deny it, period!
                 _granted = 0
               end
             end
           end
         end
+        
         # if the access is granted? i.e if all the rules are satisfied with the request
         return if _granted == 1 and access_granted _info, _entitled_entities
         # if the access is denied? i.e at least one of rules are NOT satisfied with the request
@@ -124,26 +129,26 @@ module Acu
       def hit_cache _info
         # return [didn't hit] if not allowed to use cache
         return false if not Configs.get :use_cache
+        # fetched cached data for current info
+        cached_data = Rails.cache.read cache_name(_info), cache_options
+        # return not hit if no cached data found
+        return false if not cached_data
         # fetch the relative entities to this request
-        _entitled_entities = Rules.entities.select { |name, _| valid_for? name }
-        # fetch the cache-name
-        cname = cache_name _info, _entitled_entities
-        # return [didn't hit] if not found in cache
-        return false if not Rails.cache.exist? cname, cache_options
-        # check if the request is allowed in cache?
-        if is_allowed?(Rails.cache.read(cname, cache_options).to_s.to_sym)
-          # grant the access
-          access_granted _info, _entitled_entities.keys, from_cache: true
-        else
-          # deny the access
-          access_denied _info, _entitled_entities.keys, from_cache: true
-        end
-        # hit the cache
-        return true
+        _entitled_entities = Rules.entities.select { |name, _| valid_for? name }.keys.map(&:to_sym)
+        # check if any of entities is among the should-denied ones?
+        denied = cached_data[Rules.DENY_SYMBOL] & _entitled_entities
+        # check if any of entities is among the should-grant ones?
+        granted = cached_data[Rules.GRANT_SYMBOL] & _entitled_entities
+        # check if we have any resons to deny the access?
+        return true if not denied.empty? and access_denied _info, denied, from_cache: true
+        # o.w. grant the access if any explicit rule
+        return true if not granted.empty? and access_granted _info, granted, from_cache: true
+        # if not granted nor denied by cache, discard the cache data & proceed
+        return false
       end
 
-      def cache_name _info, entities
-        "%s-%s" %[_info.to_a.join('::'), (entities.kind_of?(Array) ? entities : entities.keys).join("-")]
+      def cache_name _info, entities = []
+        ("%s-%s" %[_info.to_a.join('::'), (entities.kind_of?(Array) ? entities : entities.keys).sort.join("-")]).gsub(/-+$/, "")
       end
 
       def is_allowed? action
@@ -170,6 +175,19 @@ module Acu
         file = Configs.get :audit_log_file
         # log if allowed?
         Logger.new(Configs.get :audit_log_file).info(log) if file and not file.blank?
+      end
+
+      def cache_access _info, entities, symbol
+        if not Rails.cache.exist?(cache_name(_info), cache_options)
+          Rails.cache.write(cache_name(_info), {
+            Rules.DENY_SYMBOL => [],
+            Rules.GRANT_SYMBOL => []
+          }, cache_options)
+        end
+        cache_data = Rails.cache.read cache_name(_info), cache_options
+        cache_data[symbol] += [entities].flatten.map(&:to_sym)
+        cache_data[symbol] = cache_data[symbol].flatten.uniq
+        Rails.cache.write cache_name(_info), cache_data, cache_options
       end
 
       def access_granted _info, entities, by_default: false, from_cache: false
