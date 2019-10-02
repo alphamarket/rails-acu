@@ -14,8 +14,9 @@ matrix:
   fast_finish: true
 
 before_install:
-  - gem update --system 2.6.11
-  - gem install bundler -v 1.14.6
+  - gem update --system 3.0.3
+  - gem install bundler -v 2.0.2
+  - bundler install
 
 script:
   - export RAILS_ENV=test
