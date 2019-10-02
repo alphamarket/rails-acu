@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/noise2/rails-acu.svg?branch=master)](https://travis-ci.org/noise2/rails-acu)
+[![Build Status](https://travis-ci.org/alphamarket/rails-acu.svg?branch=master)](https://travis-ci.org/alphamarket/rails-acu)
 
 > ### Note:
 > This branch is maintained for **Rails v6.*** and **Ruby v2.6.*** for *Rails v5.** please use `rails-5` branch.
