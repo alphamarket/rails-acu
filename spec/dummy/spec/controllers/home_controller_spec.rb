@@ -65,7 +65,7 @@ RSpec.describe HomeController, type: :controller do
         expect(Acu::Rules.rules.length).to be 1
         expect(Acu::Rules.rules[{}].length).to be 2
         get :index
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone, :client`/
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:client, :everyone`/
       end
       it "{ one of rules failed = AccessDenied }" do
         Acu::Rules.define do
@@ -77,7 +77,7 @@ RSpec.describe HomeController, type: :controller do
           deny :client
         end
         expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone, :client`/
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:client, :everyone`/
 
         Acu::Rules.define do
           whois(:client) { false }
@@ -472,9 +472,9 @@ RSpec.describe HomeController, type: :controller do
         expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone`/
         Acu::Rules.define { whois(:client) { true } }
         get :index
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone, :client`/
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:client, :everyone`/
         get :contact
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone, :client`/
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:client, :everyone`/
         Acu::Rules.define do
           namespace do
             controller :home do
@@ -484,9 +484,9 @@ RSpec.describe HomeController, type: :controller do
         end
         expect {get :index}.to raise_error(Acu::Errors::AccessDenied)
         # the first rule that failed is going to mention
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:everyone, :client`/
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access DENIED to.*namespace=\[nil\].*controller=\["home"\].*action=\["index"\].*as `:client, :everyone`/
         get :contact
-        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:everyone, :client`/
+        expect(`tail -n 1 #{Acu::Configs.get :audit_log_file}`).to match /access GRANTED to.*namespace=\[nil\].*controller=\["home"\].*action=\["contact"\].*as `:client, :everyone`/
       end
       it "[namespace/controller]" do
         Acu::Rules.define do

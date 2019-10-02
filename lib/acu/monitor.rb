@@ -174,18 +174,14 @@ module Acu
 
       def access_granted _info, entities, by_default: false, from_cache: false
         # log the event
-        log_audit ("[-]" + (from_cache ? '[c]' : '') + " access GRANTED to `#{_info}` as `:#{entities.uniq.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
-        # cache the event if not already from cache
-        Rails.cache.write(cache_name(_info, entities), Rules.GRANT_SYMBOL, cache_options) if not from_cache and Configs.get :use_cache
+        log_audit ("[-]" + (from_cache ? '[c]' : '') + " access GRANTED to `#{_info}` as `:#{entities.uniq.sort.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
         # grant the access
         true
       end
 
       def access_denied _info, entities, by_default: false, from_cache: false
         # log the event
-        log_audit ("[x]" + (from_cache ? '[c]' : '') + " access DENIED to `#{_info}` as `:#{entities.uniq.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
-        # cache the event if not already from cache
-        Rails.cache.write(cache_name(_info, entities), Rules.DENY_SYMBOL, cache_options) if not from_cache and Configs.get :use_cache
+        log_audit ("[x]" + (from_cache ? '[c]' : '') + " access DENIED to `#{_info}` as `:#{entities.uniq.sort.join(", :")}`" + (by_default ? " [autherized by :allow_by_default]" : ""))
         # deny the access
         raise Errors::AccessDenied.new("you don't have the enough access for process this request!")
       end
