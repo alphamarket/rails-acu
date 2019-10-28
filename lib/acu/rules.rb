@@ -3,8 +3,8 @@ require_relative 'utilities'
 module Acu
   class Rules
 
-    @rules = { }
-    @entities = { }
+    @rules = { }.with_indifferent_access
+    @entities = { }.with_indifferent_access
 
     @GRANT_SYMBOL = :allow
     @DENY_SYMBOL  = :deny
