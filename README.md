@@ -92,7 +92,7 @@ Acu::Rules.define do
   end
 
   # nested namespace (since v3.0.0)
-  namespace :admin do 
+  namespace :admin do
     namespace :chat do
       allow :client
     end
@@ -148,7 +148,25 @@ acu_as [:admin, :client] do
 end
 
 # DO NOT execute the block if current user identified as `:guest`
-acu_except [:guest] do 
+acu_except [:guest] do
+  puts 'Except `:guest`s anyone else can execute this code'
+end
+
+# [since version v4.1.0]
+# alias checking:
+#   passing dynamic params to check if the passed params identify as an entity or not!
+#   NOTE: the passed arguments should match the entity definition arguments  
+
+# checks if the given user is an `admin` entity or not?
+acu_is? :admin, user: User.find_by_username('username')
+# checks if the given user is an `admin` OR a `client` entity or not?
+acu_is? [:admin, :client], user: User.find_by_username('username')
+# execute the block if the passed user is an `admin`
+acu_as :admin, user: User.find_by_username('username') do
+    puts 'The `username` is an `admin`'
+end
+# DO NOT execute the block if passed user identified as `:guest`
+acu_except [:guest], user: User.find_by_username('username') do
   puts 'Except `:guest`s anyone else can execute this code'
 end
 ```
@@ -237,7 +255,7 @@ class Acu::Errors::MissingController < MissingData
 class Acu::Errors::MissingNamespace < MissingData
 ```
 
-## Known contributions subjects to work on 
+## Known contributions subjects to work on
 
 ### Implementing to overriding the rules in inner loops:
 Consider we have to give the everyone to access the default namespace except `:profile` controller which will only allow by signed in users, although there are tools provided

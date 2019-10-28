@@ -39,7 +39,7 @@ module Acu
             t = -1
             # either mentioned explicitly
             if cond[current] and not cond[current].empty?
-              # hierarchical match `_info[current]` with `cond[current]` to support nested namespace (since v3.0.0)   
+              # hierarchical match `_info[current]` with `cond[current]` to support nested namespace (since v3.0.0)
               cond[current].map { |c| c[:name].to_s }.each.with_index do |c, index|
                 t = (c == eval("_info.#{current}")[index].to_s) ? 1 : 0
                 break if t == 0
@@ -54,7 +54,7 @@ module Acu
                 tag_list = cond[parent].map { |c| c[tag] }.flatten - [nil]
                 # if any tag is present?
                 if not tag_list.empty? and tag_list.any?
-                  # if `current` is mentioned in `tag_list`? 
+                  # if `current` is mentioned in `tag_list`?
                   case not (tag_list.map(&:to_s) & eval("_info.#{current}").map(&:to_s)).empty?
                   when true
                     t = val[:on_true]
@@ -96,7 +96,7 @@ module Acu
             end
           end
         end
-        
+
         # if the access is granted? i.e if all the rules are satisfied with the request
         return if _granted == 1 and access_granted _info, _entitled_entities
         # if the access is denied? i.e at least one of rules are NOT satisfied with the request
@@ -106,13 +106,17 @@ module Acu
         access_granted _info, [:__ACU_BY_DEFAULT__], by_default: true
       end
 
-      def valid_for? entity
+      def valid_for? entity, **args
         # check for existance
         raise Errors::MissingEntity.new("whois(:#{entity})?") if not Rules.entities[entity]
         # fetch the entity's identity
         e = Rules.entities[entity]
+        # set default argument set
+        wargs = @kwargs
+        # set externals if any argument is provided from outside?
+        wargs = args unless args.blank?
         # fetch the related args to the entity from the `kwargs`
-        kwargs = @kwargs.reject { |x| !e[:args].include?(x) }
+        kwargs = wargs.reject { |x| !e[:args].include?(x) }
         # if fetched args and pre-defined arg didn't match?
         raise Errors::MissingData.new("at least one of arguments for `whois(:#{entity})` is not provided!") if kwargs.length != e[:args].length
         # send varibles in order the have defined
